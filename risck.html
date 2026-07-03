@@ -1,0 +1,590 @@
+Исправь код:
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактив «Исключение лишнего»</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f0f4fa;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 48px;
+            padding: 30px 30px 35px;
+            box-shadow: 0 20px 40px rgba(0, 20, 40, 0.06);
+            transition: 0.2s;
+        }
+
+        .case-box {
+            background: #f4f8ff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-left: 5px solid #2a7de1;
+            color: #1a3a5c;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .case-box strong {
+            color: #0b2b40;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #0b2b40;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 0;
+        }
+
+        .sub {
+            background: #e9f1fc;
+            padding: 12px 20px;
+            border-radius: 60px;
+            color: #1a405f;
+            font-size: 15px;
+            margin: 10px 0 24px 0;
+            border-left: 4px solid #2a7de1;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 28px;
+        }
+
+        .list-section {
+            flex: 2.2;
+            min-width: 300px;
+        }
+
+        .trash-section {
+            flex: 1;
+            min-width: 200px;
+            background: #f8fbfe;
+            border-radius: 40px;
+            border: 2px dashed #cbdae9;
+            padding: 20px 14px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .trash-section.drag-over {
+            background: #edf5ff;
+            border-color: #2a7de1;
+            box-shadow: 0 0 0 4px rgba(42, 125, 225, 0.12);
+        }
+
+        .trash-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 20px;
+            color: #1d3d5c;
+            margin-bottom: 16px;
+        }
+
+        .trash-header span {
+            font-size: 32px;
+        }
+
+        .trash-items {
+            width: 100%;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 4px 0;
+        }
+
+        .trash-placeholder {
+            color: #8a9eb0;
+            text-align: center;
+            padding: 24px 8px;
+            background: #eef4fb;
+            border-radius: 40px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-item {
+            background: white;
+            border-radius: 60px;
+            padding: 14px 20px;
+            border: 1.5px solid #dde8f2;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.02);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: grab;
+            transition: 0.1s;
+            font-size: 15px;
+            color: #172f42;
+            user-select: none;
+        }
+
+        .action-item:hover {
+            background: #f9fcff;
+            border-color: #adc6e0;
+            box-shadow: 0 6px 14px rgba(0, 40, 80, 0.04);
+        }
+
+        .action-item:active {
+            cursor: grabbing;
+        }
+
+        .action-item.dragging {
+            opacity: 0.3;
+            transform: scale(0.97);
+        }
+
+        .action-item .drag-icon {
+            color: #889eb3;
+            font-size: 18px;
+        }
+
+        .action-item .item-index {
+            background: #e5eef9;
+            border-radius: 40px;
+            min-width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #12406b;
+            flex-shrink: 0;
+        }
+
+        .action-item.trash-item {
+            background: #f2f7fd;
+            border-color: #c9d8ea;
+            opacity: 0.85;
+            cursor: default;
+            padding: 10px 16px;
+            font-size: 14px;
+            box-shadow: none;
+        }
+
+        .action-item.trash-item .drag-icon {
+            display: none;
+        }
+
+        .action-item.trash-item .item-index {
+            background: #d3e0ef;
+            color: #1f4a70;
+            min-width: 26px;
+            height: 26px;
+            font-size: 12px;
+        }
+
+        .toolbar {
+            margin-top: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px 20px;
+        }
+
+        .btn {
+            background: #eef3fa;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 500;
+            color: #1f3d5a;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn:hover {
+            background: #dce6f2;
+            color: #0c2942;
+        }
+
+        .feedback {
+            background: #e8f0fe;
+            border-radius: 60px;
+            padding: 10px 24px;
+            color: #004080;
+            font-weight: 450;
+            font-size: 15px;
+            cursor: default;
+            transition: 0.2s;
+        }
+
+        .feedback.clickable {
+            cursor: pointer;
+        }
+
+        .feedback.clickable:hover {
+            background: #dce8f8;
+        }
+
+        .badge {
+            background: #d1e0f0;
+            border-radius: 60px;
+            padding: 4px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #12406b;
+        }
+
+        .stat {
+            color: #305b7a;
+            font-size: 14px;
+        }
+
+        hr {
+            margin: 18px 0 10px;
+            border: 1px solid #e2ebf3;
+        }
+
+        /* подсказки скрыты */
+        .hint-area {
+            display: none;
+        }
+
+        @media (max-width: 740px) {
+            .container {
+                padding: 20px;
+            }
+            .action-item {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- Кейс в самом верху -->
+        <div class="case-box">
+            <strong>📋 Кейс:</strong> Компания ведёт работы на лицензионном участке. Инспектор Росприроднадзора, используя геопортал и спутниковые снимки, обнаружил, что часть техники и временных сооружений размещена за пределами цифровых границ участка, указанных в графической части лицензии. Кроме того, в приложениях к лицензии зафиксирован график этапов разведки, и компания отстаёт от сроков на 3 месяца.
+        </div>
+
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center;">
+            <h1>Оставьте в перечне риски, которые возникают для организации</h1>
+            <span class="badge" id="counterDisplay">Осталось: 5</span>
+        </div>
+
+        <div class="sub">
+            ⚡ Перетащите лишние пункты в урну справа.
+        </div>
+
+        <div class="main-layout">
+            <!-- Левая часть: список -->
+            <div class="list-section">
+                <div class="action-list" id="actionList"></div>
+                <div class="toolbar">
+                    <button class="btn" id="resetBtn">⟳ Сбросить</button>
+                    <span class="feedback clickable" id="checkFeedback">Проверить результат</span>
+                    <span class="stat" id="trashCount">В урне: 0</span>
+                </div>
+            </div>
+
+            <!-- Урна -->
+            <div class="trash-section" id="trashZone">
+                <div class="trash-header">
+                    <span>🗑️</span> Урна
+                </div>
+                <div class="trash-items" id="trashItems">
+                    <div class="trash-placeholder" id="trashPlaceholder">Перетащите сюда лишнее</div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <!-- Подсказки скрыты -->
+        <div class="hint-area"></div>
+    </div>
+
+    <script>
+        (function() {
+            // Исходные данные (5 пунктов)
+            const initialItems = [
+                "Система автоматически пометит участок как рисковый для внеплановой проверки",
+                "Компания может получить предписание или штраф за ведение работ за пределами горного отвода",
+                "Факт нарушения легко подтверждается сопоставлением координат из лицензии со спутниковыми данными",
+                "Отставание от сроков этапов разведки не является нарушением, если работы ведутся", // Индекс 3 — Лишний
+                "Достаточно устного пояснения инспектору - данные в системе не имеют юридической силы" // Индекс 4 — Лишний
+            ];
+
+            // Индексы элементов, которые должны оказаться в мусорной корзине
+            const trashIndicesExpectedSet = new Set([3, 4]);
+
+            let mainList = [];
+            let trashList = [];
+            let nextId = 0;
+
+            const actionListEl = document.getElementById('actionList');
+            const trashItemsEl = document.getElementById('trashItems');
+            const trashPlaceholder = document.getElementById('trashPlaceholder');
+            const trashCountEl = document.getElementById('trashCount');
+            const counterDisplay = document.getElementById('counterDisplay');
+            const checkFeedback = document.getElementById('checkFeedback');
+            const resetBtn = document.getElementById('resetBtn');
+            const trashZone = document.getElementById('trashZone');
+
+            function init() {
+                mainList = [];
+                trashList = [];
+                nextId = 0;
+
+                initialItems.forEach((text, idx) => {
+                    mainList.push({
+                        id: nextId++,
+                        text: text,
+                        index: idx,
+                    });
+                });
+
+                renderAll();
+                updateCounters();
+                checkFeedback.textContent = 'Проверить результат';
+                checkFeedback.style.background = '#e8f0fe';
+                checkFeedback.style.color = '#004080';
+            }
+
+            function renderAll() {
+                renderMainList();
+                renderTrashList();
+            }
+
+            function renderMainList() {
+                if (mainList.length === 0) {
+                    actionListEl.innerHTML =
+                        `<div style="padding: 30px; text-align: center; color: #6b7f92; background: #f6faff; border-radius: 60px;">Все действия перемещены</div>`;
+                    return;
+                }
+                let html = '';
+                mainList.forEach((item, idx) => {
+                    const number = idx + 1;
+                    html += `
+                        <div class="action-item" draggable="true" data-id="${item.id}" data-index="${item.index}">
+                            <span class="drag-icon">⠿</span>
+                            <span class="item-index">${number}</span>
+                            <span>${item.text}</span>
+                        </div>
+                    `;
+                });
+                actionListEl.innerHTML = html;
+
+                document.querySelectorAll('#actionList .action-item').forEach(el => {
+                    el.addEventListener('dragstart', handleDragStart);
+                    el.addEventListener('dragend', handleDragEnd);
+                });
+            }
+
+            function renderTrashList() {
+                if (trashList.length === 0) {
+                    trashItemsEl.innerHTML =
+                        `<div class="trash-placeholder" id="trashPlaceholder">Перетащите сюда лишнее</div>`;
+                    return;
+                }
+                let html = '';
+                trashList.forEach((item) => {
+                    html += `
+                        <div class="action-item trash-item" data-id="${item.id}" data-index="${item.index}">
+                            <span class="item-index">🗑️</span>
+                            <span>${item.text}</span>
+                        </div>
+                    `;
+                });
+                trashItemsEl.innerHTML = html;
+            }
+
+            let draggedId = null;
+
+            function handleDragStart(e) {
+                const el = e.target.closest('.action-item');
+                if (!el) return;
+                const id = Number(el.dataset.id);
+                const item = mainList.find(it => it.id === id);
+                if (!item) {
+                    e.preventDefault();
+                    return;
+                }
+                draggedId = id;
+                e.dataTransfer.setData('text/plain', id);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => el.classList.add('dragging'), 0);
+            }
+
+            function handleDragEnd(e) {
+                const el = e.target.closest('.action-item');
+                if (el) el.classList.remove('dragging');
+                trashZone.classList.remove('drag-over');
+                draggedId = null;
+            }
+
+            trashZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                trashZone.classList.add('drag-over');
+            });
+
+            trashZone.addEventListener('dragleave', () => {
+                trashZone.classList.remove('drag-over');
+            });
+
+            trashZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                trashZone.classList.remove('drag-over');
+                const id = Number(e.dataTransfer.getData('text/plain'));
+                if (isNaN(id)) return;
+
+                const indexInMain = mainList.findIndex(item => item.id === id);
+                if (indexInMain === -1) return;
+
+                const [moved] = mainList.splice(indexInMain, 1);
+                trashList.push(moved);
+                renderAll();
+                updateCounters();
+            });
+
+            actionListEl.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+
+            actionListEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const targetEl = e.target.closest('.action-item');
+                if (!targetEl) return;
+
+                const draggedId = Number(e.dataTransfer.getData('text/plain'));
+                if (isNaN(draggedId)) return;
+
+                const targetId = Number(targetEl.dataset.id);
+                if (draggedId === targetId) return;
+
+                const fromIndex = mainList.findIndex(item => item.id === draggedId);
+                const toIndex = mainList.findIndex(item => item.id === targetId);
+                if (fromIndex === -1 || toIndex === -1) return;
+
+                const [moved] = mainList.splice(fromIndex, 1);
+                mainList.splice(toIndex, 0, moved);
+                renderMainList();
+                updateCounters();
+            });
+
+            function updateCounters() {
+                const left = mainList.length;
+                counterDisplay.textContent = `Осталось: ${left}`;
+                const trashCount = trashList.length;
+                trashCountEl.textContent = `В урне: ${trashCount}`;
+
+                const placeholder = document.getElementById('trashPlaceholder');
+                if (placeholder) {
+                    placeholder.style.display = trashList.length > 0 ? 'none' : 'block';
+                }
+            }
+
+            function checkSelection() {
+                // Проверяем, что в урне ровно 3 элемента
+                if (trashList.length !== 3) {
+                    checkFeedback.textContent = '❌ Вы ошиблись';
+                    checkFeedback.style.background = '#ffe9e6';
+                    checkFeedback.style.color = '#a1312a';
+                    return;
+                }
+
+                // Проверяем, что в урне именно те элементы, которые должны быть
+                const trashIndices = trashList.map(item => item.index);
+                const isCorrectTrash = trashIndices.length === 3 &&
+                    trashIndices.every(idx => trashIndicesExpectedSet.has(idx));
+
+                if (isCorrectTrash) {
+                    checkFeedback.textContent = '✅ Отлично! Лишние элементы найдены.';
+                    checkFeedback.style.background = '#daf0da';
+                    checkFeedback.style.color = '#0f5720';
+                } else {
+                    checkFeedback.textContent = '❌ Вы ошиблись';
+                    checkFeedback.style.background = '#ffe9e6';
+                    checkFeedback.style.color = '#a1312a';
+                }
+            }
+
+            resetBtn.addEventListener('click', () => {
+                init();
+                trashZone.classList.remove('drag-over');
+            });
+
+            checkFeedback.addEventListener('click', checkSelection);
+
+            const originalRenderAll = renderAll;
+            renderAll = function() {
+                originalRenderAll();
+                updateCounters();
+                // Всегда возвращаем текст на кнопке, если не было проверки
+                if (checkFeedback.textContent !== '✅ Отлично! Лишние элементы найдены.' &&
+                    checkFeedback.textContent !== '❌ Вы ошиблись') {
+                    checkFeedback.textContent = 'Проверить результат';
+                    checkFeedback.style.background = '#e8f0fe';
+                    checkFeedback.style.color = '#004080';
+                }
+            };
+
+            const origRenderMain = renderMainList;
+            renderMainList = function() {
+                origRenderMain();
+                document.querySelectorAll('#actionList .action-item').forEach(el => {
+                    el.removeEventListener('dragstart', handleDragStart);
+                    el.removeEventListener('dragend', handleDragEnd);
+                    el.addEventListener('dragstart', handleDragStart);
+                    el.addEventListener('dragend', handleDragEnd);
+                });
+            };
+
+            // Сбрасываем текст на кнопке при инициализации
+            const origInit = init;
+            init = function() {
+                origInit();
+                checkFeedback.textContent = 'Проверить результат';
+                checkFeedback.style.background = '#e8f0fe';
+                checkFeedback.style.color = '#004080';
+            };
+
+            init();
+            window.renderAll = renderAll;
+        })();
+    </script>
+</body>
+</html>
+Правильные варианты, которые нужно оставить: "Система автоматически пометит участок как рисковый для внеплановой проверки.", "Компания может получить предписание и штраф за ведение работ за пределами горного отвода.", "Факт нарушения легко подтверждается сопоставлением координат из лицензии со спутниковыми данными."
+В корзину нужно переместить: "Отставание от сроков этапов разведки не является нарушением, если работы ведутся.", "Достаточно устного пояснения инспектору — данные в системе не имеют юридической силы.".
+Если переместить варианты так как я тебе написана, на кнопке "Вы ошиблись" с этом случае должно быть написано "Верно!"
