@@ -103,6 +103,29 @@
             color: #0b2a41;
             margin-right: 4px;
         }
+        .check-item .move-btn {
+            background: #eaf1fa;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1c5a7a;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            height: 36px;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .check-item .move-btn:hover {
+            background: #d4e3f2;
+            border-color: #a3bed9;
+            transform: scale(0.97);
+        }
         .check-item.can-move {
             background: #f4faff;
             border-left: 4px solid #3d8bb0;
@@ -163,6 +186,28 @@
             font-weight: 600;
             color: #0b2a41;
             margin-right: 4px;
+        }
+        .sub-item .move-btn {
+            background: #eaf1fa;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #1c5a7a;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            height: 30px;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .sub-item .move-btn:hover {
+            background: #d4e3f2;
+            border-color: #a3bed9;
         }
         .sub-item.can-move {
             background: #f0f7ff;
@@ -538,6 +583,15 @@
                         subContent.className = 'content';
                         subContent.innerHTML = `<span class="item-number">${headerNumber}.${subCounter}.</span> ${subCard.text}`;
                         subDiv.appendChild(subContent);
+
+                        const btn = document.createElement('button');
+                        btn.className = 'move-btn';
+                        btn.innerHTML = '➡️ в корзину';
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            moveCardToBasket(subCard.id);
+                        });
+                        subDiv.appendChild(btn);
                         
                         subGroup.appendChild(subDiv);
                     });
@@ -562,6 +616,15 @@
                         contentSpan.className = 'content';
                         contentSpan.innerHTML = `<span class="item-number">${displayNumber}.</span> ${card.text}`;
                         div.appendChild(contentSpan);
+
+                        const btn = document.createElement('button');
+                        btn.className = 'move-btn';
+                        btn.innerHTML = '➡️ в корзину';
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            moveCardToBasket(card.id);
+                        });
+                        div.appendChild(btn);
 
                         checklistContainer.appendChild(div);
                     }
