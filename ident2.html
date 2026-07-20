@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Алгоритм идентификации ОПО</title>
+    <style>
+        /* ===== Сброс и общие стили ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e8edf2 0%, #d0d9e3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 20px 20px 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 6px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Заголовок ===== */
+        h1 {
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.6rem;
+            letter-spacing: -0.5px;
+            color: #1a2b3c;
+            margin-bottom: 14px;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+
+        /* ===== Игровое поле ===== */
+        .game-board {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 20px 30px;
+            justify-content: center;
+            align-items: flex-start;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        /* ===== Левая группа (шаги) ===== */
+        .left-group-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .left-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 0 0 auto;
+            padding-top: 28px;
+            position: relative;
+        }
+
+        .left-group .group-label {
+            font-weight: 400;
+            font-size: 1rem;
+            color: #1f3a4b;
+            text-align: center;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            position: absolute;
+            margin-top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        /* ===== Правая группа (действия) ===== */
+        .right-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1 1 auto;
+            min-width: 0;
+            padding-top: 28px;
+            position: relative;
+            min-width: 180px;
+        }
+
+        .right-group .group-label {
+            font-weight: 400;
+            font-size: 1rem;
+            color: #1f3a4b;
+            text-align: center;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            position: absolute;
+            margin-top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        #rightList {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /* ===== Карточки (общие) ===== */
+        .card {
+            padding: 10px 16px;
+            border-radius: 60px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.02);
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a2b3c;
+            border: 1px solid rgba(200, 212, 224, 0.6);
+            transition: all 0.15s ease;
+            cursor: default;
+            backdrop-filter: blur(2px);
+            background: rgba(255, 255, 255, 0.9);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            height: 42px;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+
+        /* ===== Левая карточка (шаг) ===== */
+        .card-left {
+            background: #d6e2f0;
+            border-left: 6px solid #1e4b6e;
+            font-weight: 600;
+            color: #0b2638;
+            box-shadow: 0 4px 6px rgba(0, 20, 30, 0.08);
+            justify-content: center;
+            text-align: center;
+            padding: 8px 18px;
+            font-size: 0.8rem;
+            width: auto;
+            min-width: 70px;
+        }
+
+        .card-left::before {
+            content: "⚙️";
+            margin-right: 6px;
+            font-size: 0.95rem;
+            opacity: 0.8;
+        }
+
+        /* ===== Правая карточка (действие) ===== */
+        .card-right {
+            background: #f2f7ff;
+            border-left: 6px solid #3b7ca5;
+            cursor: grab;
+            user-select: none;
+            justify-content: flex-start;
+            padding: 8px 14px 8px 16px;
+            height: 42px;
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-right::after {
+            content: "⇅";
+            font-size: 0.95rem;
+            margin-left: auto;
+            padding-left: 8px;
+            opacity: 0.5;
+            color: #3b7ca5;
+            transition: opacity 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .card-right:hover::after {
+            opacity: 1;
+        }
+
+        .card-right:active {
+            cursor: grabbing;
+            background: #e5effa;
+            box-shadow: 0 8px 16px rgba(0, 40, 70, 0.15);
+            transform: scale(1.02);
+        }
+
+        .card-right.dragging {
+            opacity: 0.3;
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-right.drag-over {
+            border-left: 6px solid #f5b042;
+            background: #fcf3e0;
+            transform: scale(1.02);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+        }
+
+        /* ===== Кнопки ===== */
+        .btn-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 16px;
+            margin: 20px 0 10px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            background: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1f3a4b;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(200, 212, 224, 0.5);
+            transition: 0.2s ease;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(0, 20, 40, 0.15);
+            border-color: #8baac7;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: #1e4b6e;
+            border-color: #1e4b6e;
+            color: white;
+            box-shadow: 0 8px 16px rgba(26, 67, 113, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: #143b57;
+            border-color: #143b57;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1f3a4b;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d9e3;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== Фидбек ===== */
+        .feedback {
+            margin: 12px 0 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70px;
+            flex-shrink: 0;
+        }
+
+        .result-box {
+            padding: 14px 24px;
+            border-radius: 80px;
+            background: white;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 2px solid transparent;
+            font-size: 1.4rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.9);
+            animation: pop 0.3s ease;
+        }
+
+        .result-box.success {
+            border-color: #27ae60;
+            color: #1e7e3a;
+        }
+
+        .result-box.error {
+            border-color: #e74c3c;
+            color: #b03a2e;
+        }
+
+        .result-box .emoji-big {
+            font-size: 2.4rem;
+            line-height: 1;
+        }
+
+        .result-box .message {
+            font-size: 1.2rem;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.3;
+            }
+            80% {
+                transform: scale(1.08);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ===== Подвал ===== */
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #3b5770;
+            opacity: 0.7;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            padding-top: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ===== Адаптивность ===== */
+        @media (max-width: 700px) {
+            .container {
+                padding: 12px 10px 10px;
+                border-radius: 28px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .game-board {
+                gap: 12px 16px;
+            }
+
+            .left-group {
+                gap: 8px;
+                padding-top: 22px;
+            }
+
+            .left-group .group-label {
+                font-size: 0.8rem;
+                margin-top: -22px;
+            }
+
+            .right-group {
+                gap: 8px;
+                padding-top: 22px;
+                min-width: 120px;
+            }
+
+            .right-group .group-label {
+                font-size: 0.8rem;
+                margin-top: -22px;
+            }
+
+            .card {
+                padding: 6px 12px;
+                height: 34px;
+                font-size: 0.7rem;
+                border-radius: 40px;
+            }
+
+            .card-left {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+                min-width: 50px;
+            }
+
+            .card-left::before {
+                font-size: 0.8rem;
+                margin-right: 4px;
+            }
+
+            .card-right {
+                padding: 6px 10px 6px 12px;
+                height: 34px;
+                font-size: 0.7rem;
+            }
+
+            .card-right::after {
+                font-size: 0.8rem;
+                padding-left: 6px;
+            }
+
+            #rightList {
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 8px 18px;
+                font-size: 0.85rem;
+            }
+
+            .result-box {
+                padding: 10px 16px;
+                font-size: 1rem;
+                gap: 10px;
+            }
+
+            .result-box .emoji-big {
+                font-size: 1.8rem;
+            }
+
+            .result-box .message {
+                font-size: 1rem;
+            }
+
+            .footer-note {
+                font-size: 0.6rem;
+            }
+
+            .left-group,
+            .right-group {
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-board {
+                gap: 8px 10px;
+            }
+
+            .left-group {
+                gap: 6px;
+                padding-top: 18px;
+            }
+
+            .left-group .group-label {
+                font-size: 0.65rem;
+                margin-top: -18px;
+            }
+
+            .right-group {
+                gap: 6px;
+                padding-top: 18px;
+                min-width: 80px;
+            }
+
+            .right-group .group-label {
+                font-size: 0.65rem;
+                margin-top: -18px;
+            }
+
+            .card {
+                padding: 4px 8px;
+                height: 28px;
+                font-size: 0.6rem;
+                border-radius: 30px;
+            }
+
+            .card-left {
+                padding: 4px 8px;
+                font-size: 0.6rem;
+                min-width: 38px;
+                border-left-width: 4px;
+            }
+
+            .card-left::before {
+                font-size: 0.65rem;
+                margin-right: 3px;
+            }
+
+            .card-right {
+                padding: 4px 8px 4px 10px;
+                height: 28px;
+                font-size: 0.6rem;
+                border-left-width: 4px;
+            }
+
+            .card-right::after {
+                font-size: 0.65rem;
+                padding-left: 4px;
+            }
+
+            #rightList {
+                gap: 6px;
+            }
+
+            .btn {
+                padding: 6px 14px;
+                font-size: 0.7rem;
+            }
+
+            .result-box {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                gap: 6px;
+                border-radius: 40px;
+            }
+
+            .result-box .emoji-big {
+                font-size: 1.4rem;
+            }
+
+            .result-box .message {
+                font-size: 0.8rem;
+            }
+
+            .container {
+                padding: 8px 6px 6px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 1rem;
+                margin-bottom: 6px;
+            }
+
+            .left-group,
+            .right-group {
+                gap: 6px;
+            }
+
+            .footer-note {
+                font-size: 0.5rem;
+                padding-top: 6px;
+                margin-top: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🧩 Алгоритм идентификации ОПО</h1>
+
+        <div class="game-board">
+            <!-- Левая колонка: шаги (только 1-5) -->
+            <div class="left-group-wrapper">
+                <div class="left-group">
+                    <div class="group-label">🔹 Шаги</div>
+                    <div class="card card-left" data-step="1">Шаг 1</div>
+                    <div class="card card-left" data-step="2">Шаг 2</div>
+                    <div class="card card-left" data-step="3">Шаг 3</div>
+                    <div class="card card-left" data-step="4">Шаг 4</div>
+                    <div class="card card-left" data-step="5">Шаг 5</div>
+                </div>
+            </div>
+
+            <!-- Правая колонка: действия (только 5) -->
+            <div class="right-group">
+                <div class="group-label">🔹 Действия</div>
+                <div id="rightList"></div>
+            </div>
+        </div>
+
+        <!-- Кнопки управления -->
+        <div class="btn-group">
+            <button class="btn btn-primary" id="checkBtn">✅ Проверить</button>
+            <button class="btn btn-secondary hidden" id="resetBtn">🔄 Сбросить</button>
+        </div>
+
+        <!-- Блок反馈 -->
+        <div class="feedback" id="feedbackArea"></div>
+
+        <div class="footer-note">Перетащите плашки справа в нужном порядке, затем нажмите «Проверить»</div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ===== Конфигурация (только 5 шагов) =====
+            const CORRECT_ORDER = [
+                'Определите, подпадает ли объект под действие ФЗ-116',
+                'Соберите исходные данные',
+                'Определите класс опасности',
+                'Выберите типовое наименование',
+                'Сформируйте сведения, характеризующие ОПО'
+            ];
+
+            const ITEMS = [
+                'Сформируйте сведения, характеризующие ОПО',
+                'Определите, подпадает ли объект под действие ФЗ-116',
+                'Определите класс опасности',
+                'Выберите типовое наименование',
+                'Соберите исходные данные'
+            ];
+
+            // ===== DOM-ссылки =====
+            const rightList = document.getElementById('rightList');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const feedbackArea = document.getElementById('feedbackArea');
+
+            let currentItems = [];
+            let draggedIndex = null;
+            let draggedElement = null;
+
+            // ===== Вспомогательные функции =====
+            function shuffleArray(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            // ===== Отрисовка правой колонки =====
+            function renderRightColumn() {
+                rightList.innerHTML = '';
+
+                currentItems.forEach((text, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card card-right';
+                    card.setAttribute('draggable', 'true');
+                    card.textContent = text;
+                    card.dataset.index = index;
+                    card.dataset.text = text;
+
+                    // События drag & drop
+                    card.addEventListener('dragstart', handleDragStart);
+                    card.addEventListener('dragend', handleDragEnd);
+                    card.addEventListener('dragover', handleDragOver);
+                    card.addEventListener('dragenter', handleDragEnter);
+                    card.addEventListener('dragleave', handleDragLeave);
+                    card.addEventListener('drop', handleDrop);
+
+                    rightList.appendChild(card);
+                });
+            }
+
+            // ===== Обработчики drag & drop =====
+            function handleDragStart(e) {
+                const card = e.currentTarget;
+                draggedElement = card;
+                draggedIndex = parseInt(card.dataset.index, 10);
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', card.dataset.text);
+                e.dataTransfer.setDragImage(new Image(), 0, 0);
+            }
+
+            function handleDragEnd(e) {
+                const card = e.currentTarget;
+                card.classList.remove('dragging');
+                document.querySelectorAll('.card-right.drag-over').forEach(el => el.classList.remove('drag-over'));
+                draggedElement = null;
+                draggedIndex = null;
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            }
+
+            function handleDragEnter(e) {
+                e.preventDefault();
+                const target = e.currentTarget;
+                if (target.classList.contains('card-right') && target !== draggedElement) {
+                    target.classList.add('drag-over');
+                }
+            }
+
+            function handleDragLeave(e) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                const target = e.currentTarget;
+                target.classList.remove('drag-over');
+
+                if (!draggedElement || target === draggedElement) return;
+
+                const fromIndex = parseInt(draggedElement.dataset.index, 10);
+                const toIndex = parseInt(target.dataset.index, 10);
+                if (isNaN(fromIndex) || isNaN(toIndex)) return;
+
+                // Перемещение элемента в массиве
+                const [removed] = currentItems.splice(fromIndex, 1);
+                currentItems.splice(toIndex, 0, removed);
+
+                renderRightColumn();
+                clearFeedback();
+                resetBtn.classList.add('hidden');
+            }
+
+            // ===== Инициализация игры =====
+            function initGame() {
+                currentItems = shuffleArray(ITEMS);
+                renderRightColumn();
+                clearFeedback();
+                resetBtn.classList.add('hidden');
+            }
+
+            // ===== Проверка порядка =====
+            function checkOrder() {
+                clearFeedback();
+                resetBtn.classList.add('hidden');
+
+                // Собираем текущий порядок из DOM
+                const cards = document.querySelectorAll('#rightList .card-right');
+                const currentOrder = [];
+                cards.forEach(card => {
+                    const text = card.textContent.trim();
+                    if (text) currentOrder.push(text);
+                });
+
+                // Если количество совпадает — обновляем массив
+                if (currentOrder.length === currentItems.length) {
+                    currentItems = currentOrder;
+                }
+
+                // Сравниваем с эталоном
+                let correct = true;
+                for (let i = 0; i < CORRECT_ORDER.length; i++) {
+                    if (currentItems[i] !== CORRECT_ORDER[i]) {
+                        correct = false;
+                        break;
+                    }
+                }
+
+                // Показываем результат
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-box';
+
+                if (correct) {
+                    resultDiv.classList.add('success');
+                    resultDiv.innerHTML = `
+                        <span class="emoji-big">🎉✨</span>
+                        <span class="message">Верно!</span>
+                        <span class="emoji-big">✨🎉</span>
+                    `;
+                    resetBtn.classList.add('hidden');
+                } else {
+                    resultDiv.classList.add('error');
+                    resultDiv.innerHTML = `
+                        <span class="emoji-big">❌</span>
+                        <span class="message">Вы ошиблись</span>
+                    `;
+                    resetBtn.classList.remove('hidden');
+                }
+
+                feedbackArea.appendChild(resultDiv);
+            }
+
+            // ===== Сброс игры =====
+            function resetGame() {
+                currentItems = shuffleArray(ITEMS);
+                renderRightColumn();
+                clearFeedback();
+                resetBtn.classList.add('hidden');
+            }
+
+            // ===== Очистка фидбека =====
+            function clearFeedback() {
+                feedbackArea.innerHTML = '';
+            }
+
+            // ===== Назначение обработчиков =====
+            checkBtn.addEventListener('click', checkOrder);
+            resetBtn.addEventListener('click', resetGame);
+
+            // Скрываем фидбек при начале перетаскивания
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.closest('.card-right')) {
+                    clearFeedback();
+                    resetBtn.classList.add('hidden');
+                }
+            });
+
+            // ===== Старт =====
+            initGame();
+        })();
+    </script>
+
+</body>
+</html>
