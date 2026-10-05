@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Комиссия по расследованию инцидента на ОПО</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+    }
+
+    .task-header {
+      max-width: 960px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 24px 28px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      margin-bottom: 28px;
+      border-left: 8px solid #1e4a7a;
+    }
+
+    .task-header h1 {
+      font-size: 1.8rem;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .task-header p {
+      color: #2c3e50;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .norm-badge {
+      background: #e9f0fa;
+      border-radius: 40px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      color: #1e4a7a;
+      display: inline-block;
+      font-weight: 500;
+    }
+
+    .game-container {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .candidates-area {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 24px 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .candidates-area h2 {
+      font-size: 1.3rem;
+      color: #1e3a5f;
+      margin-bottom: 20px;
+      padding-left: 16px;
+      font-weight: 600;
+      border-left: 5px solid #1e4a7a;
+    }
+
+    .cards-pool {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      min-height: 180px;
+    }
+
+    .candidate-card {
+      width: 240px;
+      background: #ffffff;
+      border: 2px solid #cfddee;
+      border-radius: 20px;
+      padding: 16px 12px 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+      transition: transform 0.1s, box-shadow 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      user-select: none;
+      position: relative;
+    }
+
+    .candidate-card:hover:not(.checked) {
+      border-color: #1e4a7a;
+      box-shadow: 0 8px 18px rgba(30, 74, 122, 0.12);
+    }
+
+    .candidate-icon {
+      font-size: 2.6rem;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .candidate-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #0f2b44;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .candidate-position {
+      font-size: 0.85rem;
+      color: #3e5a77;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .card-buttons {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .btn-card {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-card-suitable {
+      background: #e3f2e3;
+      color: #1e5e1e;
+      border: 1px solid #2e7d32;
+    }
+
+    .btn-card-suitable:hover {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .btn-card-not-suitable {
+      background: #fde7e7;
+      color: #a51e1e;
+      border: 1px solid #c62828;
+    }
+
+    .btn-card-not-suitable:hover {
+      background: #c62828;
+      color: white;
+    }
+
+    .candidate-card.correct-highlight {
+      background: #d1f0d1;
+      border-color: #1e7e34;
+    }
+
+    .candidate-card.wrong-highlight {
+      background: #f8d7da;
+      border-color: #b02a37;
+    }
+
+    .candidate-card.checked {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .candidate-card.checked:hover {
+      filter: brightness(0.97);
+    }
+
+    .drop-zones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+    }
+
+    .drop-zone {
+      flex: 1 1 320px;
+      background: #f9fcff;
+      border-radius: 28px;
+      padding: 20px 18px;
+      min-height: 250px;
+      transition: background 0.2s, border-color 0.2s;
+      border: 3px dashed #b6c9dd;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .drop-zone[data-zone="suitable"] {
+      border-color: #2e7d32;
+      background: #f0f9f0;
+    }
+
+    .drop-zone[data-zone="not-suitable"] {
+      border-color: #c62828;
+      background: #fff6f6;
+    }
+
+    .zone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .zone-header h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .drop-zone[data-zone="suitable"] .zone-header h3 {
+      color: #1e5e1e;
+    }
+
+    .drop-zone[data-zone="not-suitable"] .zone-header h3 {
+      color: #a51e1e;
+    }
+
+    .zone-counter {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .drop-zone-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      min-height: 120px;
+      align-content: flex-start;
+      justify-content: center;
+    }
+
+    .drop-zone-cards .candidate-card {
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: white;
+      border: none;
+      padding: 14px 38px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+      transition: all 0.15s;
+      border: 1px solid #cddbe9;
+      color: #1e3a5f;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary {
+      background: #1e4a7a;
+      color: white;
+      border: 1px solid #1e4a7a;
+      box-shadow: 0 8px 18px rgba(30, 74, 122, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #123a5e;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary:hover {
+      background: #e9f0fa;
+      transform: translateY(-2px);
+    }
+
+    .attempt-counter {
+      font-size: 1rem;
+      color: #2c3e50;
+      background: white;
+      padding: 8px 22px;
+      border-radius: 40px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      font-weight: 500;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 32px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px 30px;
+      box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.3);
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .modal h3 {
+      font-size: 1.5rem;
+      color: #0f2b44;
+      margin-bottom: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #2c3e50;
+      margin-bottom: 24px;
+      white-space: pre-wrap;
+    }
+
+    .modal .btn {
+      width: 100%;
+      background: #1e4a7a;
+      color: white;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="task-header">
+  <h1>🔍 Расследование инцидента на ОПО</h1>
+  <p>Отказ насосного агрегата на участке компримирования газа. Сформируйте комиссию из 3 человек: используйте кнопки на карточках, чтобы распределить кандидатов в поля «Подходят» и «Не подходят».</p>
+  <span class="norm-badge">📋 Приказ Ростехнадзора № 503 от 08.12.2020, п. 30</span>
+</div>
+
+<div class="game-container">
+  <!-- Пул кандидатов -->
+  <div class="candidates-area">
+    <h2>Кандидаты</h2>
+    <div class="cards-pool" id="cardsPool">
+      <!-- Карточки генерируются JS -->
+    </div>
+  </div>
+
+  <!-- Зоны сброса -->
+  <div class="drop-zones">
+    <div class="drop-zone" data-zone="suitable" id="zoneSuitable">
+      <div class="zone-header">
+        <h3>✅ Подходят</h3>
+        <span class="zone-counter" id="counterSuitable">0 / 3</span>
+      </div>
+      <div class="drop-zone-cards" id="suitableCards"></div>
+    </div>
+    <div class="drop-zone" data-zone="not-suitable" id="zoneNotSuitable">
+      <div class="zone-header">
+        <h3>❌ Не подходят</h3>
+        <span class="zone-counter" id="counterNotSuitable">0 / 3</span>
+      </div>
+      <div class="drop-zone-cards" id="notSuitableCards"></div>
+    </div>
+  </div>
+
+  <!-- Управление -->
+  <div class="controls">
+    <div class="attempt-counter" id="attemptCounter">Попытка: 1</div>
+    <button class="btn btn-primary" id="checkBtn">Проверить</button>
+    <button class="btn btn-secondary" id="resetBtn">Попробовать ещё раз</button>
+  </div>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent">
+    <h3 id="modalTitle">Пояснение</h3>
+    <p id="modalText"></p>
+    <button class="btn" id="modalCloseBtn">Понятно</button>
+  </div>
+</div>
+
+<script>
+  // ---------- ДАННЫЕ КАНДИДАТОВ ----------
+  const candidates = [
+    {
+      id: 'c1',
+      name: 'Соколов А.В.',
+      position: 'Главный инженер организации',
+      icon: '👨‍💼',
+      suitable: true,
+      explanation: 'Подходит. Главный инженер возглавляет комиссию по расследованию инцидента на ОПО. Он обладает полномочиями для координации расследования, знаком с технологическими процессами на объекте и не является непосредственным участником инцидента. Назначение председателем комиссии главного инженера предусмотрено внутренним положением организации, разработанным на основании Приказа Ростехнадзора от 08.12.2020 № 503'
+    },
+    {
+      id: 'c2',
+      name: 'Морозова Е.С.',
+      position: 'Инженер по промышленной безопасности отдела ПБ и ОТ',
+      icon: '👩‍🔧',
+      suitable: true,
+      explanation: 'Подходит. В состав комиссии по расследованию инцидента на ОПО обязательно включается специалист по промышленной безопасности. Морозова обладает компетенциями в области норм и правил промышленной безопасности, не связана с инцидентом напрямую и обеспечит объективную оценку нарушений требований ПБ'
+    },
+    {
+      id: 'c3',
+      name: 'Петров Д.Н.',
+      position: 'Начальник участка компримирования газа',
+      icon: '👨‍🏭',
+      suitable: true,
+      explanation: 'Подходит. В состав комиссии включается представитель структурного подразделения, в котором произошёл инцидент. Петров руководит участком компримирования, знает специфику оборудования и технологического процесса, но сам не являлся непосредственным участником инцидента. Его знания помогут установить обстоятельства и причины произошедшего'
+    },
+    {
+      id: 'c4',
+      name: 'Козлов И.М.',
+      position: 'Оператор насосной станции',
+      icon: '👨‍🔧',
+      suitable: false,
+      explanation: 'Не подходит. Козлов был непосредственным участником инцидента — он управлял насосным агрегатом в момент отказа. Включение лица, причастного к инциденту, в состав комиссии создаёт прямой конфликт интересов: расследующий не может одновременно быть объектом расследования. Козлов должен быть опрошен комиссией как свидетель или причастное лицо, но не может быть её членом'
+    },
+    {
+      id: 'c5',
+      name: 'Волков С.П.',
+      position: 'Инспектор территориального органа Ростехнадзора',
+      icon: '👮‍♂️',
+      suitable: false,
+      explanation: 'Не подходит. Расследование инцидента (в отличие от аварии) проводится организацией самостоятельно внутренним распорядительным актом руководителя. Ростехнадзор не входит в состав комиссии по расследованию инцидентов. Территориальный орган Ростехнадзора лишь получает оперативное сообщение об инциденте и впоследствии контролирует ход расследования и учёт инцидента, но не участвует в работе комиссии. Включение инспектора Ростехнадзора в комиссию по расследованию инцидента противоречит п. 30 Приказа Ростехнадзора от 08.12.2020 № 503'
+    },
+    {
+      id: 'c6',
+      name: 'Зайцева Н.К.',
+      position: 'Бухгалтер организации',
+      icon: '👩‍💼',
+      suitable: false,
+      explanation: 'Не подходит. Зайцева не обладает компетенциями в области промышленной безопасности и не связана с эксплуатацией ОПО. В состав комиссии по расследованию инцидента включаются лица, обладающие знаниями технологических процессов и требований ПБ на данном объекте. Бухгалтер может быть привлечён для расчёта материального ущерба по запросу комиссии, но не входит в её состав как член комиссии'
+    }
+  ];
+
+  // ---------- СОСТОЯНИЕ ----------
+  let attempt = 1;
+  let checked = false;
+  let currentCards = [];
+
+  // DOM элементы
+  const cardsPool = document.getElementById('cardsPool');
+  const suitableCards = document.getElementById('suitableCards');
+  const notSuitableCards = document.getElementById('notSuitableCards');
+  const counterSuitable = document.getElementById('counterSuitable');
+  const counterNotSuitable = document.getElementById('counterNotSuitable');
+  const attemptCounter = document.getElementById('attemptCounter');
+  const checkBtn = document.getElementById('checkBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+  // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+  function initGame() {
+    checked = false;
+    currentCards = candidates.map(c => ({ ...c }));
+    render();
+    updateCounters();
+    attemptCounter.textContent = `Попытка: ${attempt}`;
+    closeModal();
+  }
+
+  // ---------- ОТРИСОВКА ----------
+  function render() {
+    cardsPool.innerHTML = '';
+    suitableCards.innerHTML = '';
+    notSuitableCards.innerHTML = '';
+
+    currentCards.forEach(card => {
+      const cardEl = createCardElement(card);
+      if (card.zone === 'suitable') {
+        suitableCards.appendChild(cardEl);
+      } else if (card.zone === 'not-suitable') {
+        notSuitableCards.appendChild(cardEl);
+      } else {
+        cardsPool.appendChild(cardEl);
+      }
+    });
+
+    if (checked) {
+      document.querySelectorAll('.candidate-card').forEach(cardEl => {
+        const id = cardEl.dataset.id;
+        const candidate = currentCards.find(c => c.id === id);
+        if (!candidate) return;
+        const inSuitable = candidate.zone === 'suitable';
+        const inNotSuitable = candidate.zone === 'not-suitable';
+        if (inSuitable && candidate.suitable) {
+          cardEl.classList.add('correct-highlight');
+        } else if (inNotSuitable && !candidate.suitable) {
+          cardEl.classList.add('correct-highlight');
+        } else if ((inSuitable && !candidate.suitable) || (inNotSuitable && candidate.suitable)) {
+          cardEl.classList.add('wrong-highlight');
+        }
+        cardEl.classList.add('checked');
+      });
+    }
+
+    updateCounters();
+  }
+
+  function createCardElement(card) {
+    const div = document.createElement('div');
+    div.className = 'candidate-card';
+    div.dataset.id = card.id;
+
+    div.innerHTML = `
+      <div class="candidate-icon">${card.icon}</div>
+      <div class="candidate-name">${card.name}</div>
+      <div class="candidate-position">${card.position}</div>
+    `;
+
+    if (checked) {
+      const inSuitable = card.zone === 'suitable';
+      const inNotSuitable = card.zone === 'not-suitable';
+      if (inSuitable && card.suitable) div.classList.add('correct-highlight');
+      else if (inNotSuitable && !card.suitable) div.classList.add('correct-highlight');
+      else if ((inSuitable && !card.suitable) || (inNotSuitable && card.suitable)) div.classList.add('wrong-highlight');
+      div.classList.add('checked');
+      div.style.cursor = 'pointer';
+      div.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showModal(card.name, card.explanation);
+      });
+    } else {
+      // Добавляем кнопки выбора
+      const buttonsDiv = document.createElement('div');
+      buttonsDiv.className = 'card-buttons';
+
+      const btnSuitable = document.createElement('button');
+      btnSuitable.className = 'btn-card btn-card-suitable';
+      btnSuitable.textContent = 'Подходит';
+      btnSuitable.addEventListener('click', (e) => {
+        e.stopPropagation();
+        moveCard(card.id, 'suitable');
+      });
+
+      const btnNotSuitable = document.createElement('button');
+      btnNotSuitable.className = 'btn-card btn-card-not-suitable';
+      btnNotSuitable.textContent = 'Не подходит';
+      btnNotSuitable.addEventListener('click', (e) => {
+        e.stopPropagation();
+        moveCard(card.id, 'not-suitable');
+      });
+
+      buttonsDiv.appendChild(btnSuitable);
+      buttonsDiv.appendChild(btnNotSuitable);
+      div.appendChild(buttonsDiv);
+    }
+
+    return div;
+  }
+
+  function moveCard(cardId, targetZone) {
+    if (checked) return;
+    const card = currentCards.find(c => c.id === cardId);
+    if (!card) return;
+    if (card.zone === targetZone) return;
+    card.zone = targetZone;
+    render();
+  }
+
+  function updateCounters() {
+    const suitableCount = currentCards.filter(c => c.zone === 'suitable').length;
+    const notSuitableCount = currentCards.filter(c => c.zone === 'not-suitable').length;
+    counterSuitable.textContent = `${suitableCount} / 3`;
+    counterNotSuitable.textContent = `${notSuitableCount} / 3`;
+  }
+
+  // ---------- ПРОВЕРКА ----------
+  function checkResults() {
+    if (checked) return;
+
+    const allPlaced = currentCards.every(c => c.zone === 'suitable' || c.zone === 'not-suitable');
+    if (!allPlaced) {
+      alert('Пожалуйста, распределите все карточки по полям «Подходят» и «Не подходят».');
+      return;
+    }
+
+    const suitableCount = currentCards.filter(c => c.zone === 'suitable').length;
+    const notSuitableCount = currentCards.filter(c => c.zone === 'not-suitable').length;
+    if (suitableCount !== 3 || notSuitableCount !== 3) {
+      alert('Нужно выбрать ровно 3 кандидата в «Подходят» и 3 в «Не подходят».');
+      return;
+    }
+
+    checked = true;
+    attempt++;
+    attemptCounter.textContent = `Попытка: ${attempt}`;
+    render();
+  }
+
+  // ---------- СБРОС ----------
+  function resetGame() {
+    checked = false;
+    currentCards = candidates.map(c => ({ ...c }));
+    render();
+    updateCounters();
+    closeModal();
+    attemptCounter.textContent = `Попытка: ${attempt}`;
+  }
+
+  // ---------- МОДАЛЬНОЕ ОКНО ----------
+  function showModal(title, text) {
+    modalTitle.textContent = title;
+    modalText.textContent = text;
+    modalOverlay.classList.add('active');
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('active');
+  }
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+  modalCloseBtn.addEventListener('click', closeModal);
+
+  // ---------- ОБРАБОТЧИКИ КНОПОК ----------
+  checkBtn.addEventListener('click', checkResults);
+  resetBtn.addEventListener('click', resetGame);
+
+  // ---------- СТАРТ ----------
+  initGame();
+</script>
+</body>
+</html>
