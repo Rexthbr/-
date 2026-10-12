@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Причины инцидентов</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 32px 16px;
+    color: #1f2937;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin: 0 0 28px;
+    color: #111827;
+  }
+
+  /* ---------- Карточки в пуле ---------- */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto 32px;
+    min-height: 100px;
+    transition: min-height 0.2s ease;
+  }
+
+  /* Когда в пуле пусто — не занимает место */
+  .cards:empty {
+    display: none;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-top: 4px solid #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    font-weight: 500;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 0.15s ease, background 0.2s ease;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .card:active {
+    cursor: grabbing;
+  }
+
+  .card.dragging {
+    opacity: 0.5;
+  }
+
+  /* Подсветка при проверке */
+  .card.correct {
+    background: #dcfce7;
+    border-top-color: #16a34a;
+    box-shadow: 0 2px 10px rgba(22, 163, 74, 0.25);
+  }
+
+  .card.wrong {
+    background: #fee2e2;
+    border-top-color: #dc2626;
+    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.25);
+  }
+
+  /* ---------- Три поля в ряд ---------- */
+  .reasons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto 24px;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .reason {
+    flex: 1 1 0;
+    min-width: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #3b82f6;
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+  }
+
+  .reason h2 {
+    font-size: 1rem;
+    margin: 0 0 12px;
+    color: #1e3a8a;
+    text-align: center;
+  }
+
+  /* Слоты (пунктирные прямоугольники) — всегда одного размера */
+  .slot {
+    width: 100%;
+    height: 100px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .slot + .slot {
+    margin-top: 10px;
+  }
+
+  .slot.drag-over {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  /* Карточка внутри слота — размеры фиксированные */
+  .slot .card {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    font-size: 0.82rem;
+    padding: 8px 10px;
+    border-top-width: 3px;
+    box-shadow: none;
+    cursor: grab;
+  }
+
+  .slot .card:hover {
+    box-shadow: none;
+  }
+
+  /* Пул тоже принимает карточки обратно */
+  .cards.drag-over {
+    outline: 2px dashed #3b82f6;
+    outline-offset: 4px;
+    border-radius: 12px;
+  }
+
+  /* ---------- Кнопки ---------- */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    max-width: 1200px;
+    margin: 0 auto 24px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  button:active {
+    transform: scale(0.97);
+  }
+
+  #checkBtn {
+    background: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.35);
+  }
+
+  #checkBtn:hover {
+    background: #2563eb;
+  }
+
+  #resetBtn {
+    background: #e5e7eb;
+    color: #1f2937;
+  }
+
+  #resetBtn:hover {
+    background: #d1d5db;
+  }
+
+  /* ---------- Сообщения над полями ---------- */
+  .message {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .message.show {
+    opacity: 1;
+    transform: translateY(0);
+    height: auto;
+    margin-bottom: 8px;
+  }
+
+  .message.success {
+    color: #16a34a;
+  }
+
+  .message.error {
+    color: #dc2626;
+  }
+
+  /* Когда сообщение показано — уменьшаем отступ у пула карточек */
+  .message.show ~ .cards {
+    margin-bottom: 12px;
+    min-height: 0;
+  }
+
+  .message.show ~ .cards:empty {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .reason h2 { font-size: 0.9rem; }
+    .card { font-size: 0.82rem; height: 90px; }
+    .slot { height: 90px; }
+    .slot .card { font-size: 0.75rem; padding: 6px; }
+    button { padding: 10px 20px; font-size: 0.9rem; }
+    .message { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+  <h1>Причины инцидентов</h1>
+
+  <div class="message" id="message"></div>
+
+  <!-- Шесть карточек (пул) -->
+  <div class="cards" id="cardsPool">
+    <div class="card" draggable="true" data-correct="tech">Разрыв трубопровода из-за коррозии</div>
+    <div class="card" draggable="true" data-correct="org">Нарушение регламента персоналом</div>
+    <div class="card" draggable="true" data-correct="org">Некачественный ремонт, выполненный подрядчиком</div>
+    <div class="card" draggable="true" data-correct="sys">Формальный подход к проверкам</div>
+    <div class="card" draggable="true" data-correct="tech">Отказ предохранительного клапана</div>
+    <div class="card" draggable="true" data-correct="sys">Недостаточное финансирование</div>
+  </div>
+
+  <!-- Три поля строго в ряд, в каждом по 2 слота -->
+  <div class="reasons">
+    <div class="reason" data-type="tech">
+      <h2>Технические</h2>
+      <div class="slot" data-type="tech"></div>
+      <div class="slot" data-type="tech"></div>
+    </div>
+    <div class="reason" data-type="org">
+      <h2>Организационные</h2>
+      <div class="slot" data-type="org"></div>
+      <div class="slot" data-type="org"></div>
+    </div>
+    <div class="reason" data-type="sys">
+      <h2>Системные</h2>
+      <div class="slot" data-type="sys"></div>
+      <div class="slot" data-type="sys"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="checkBtn">Проверить</button>
+    <button id="resetBtn">Попробовать еще раз</button>
+  </div>
+
+<script>
+(function () {
+  const pool = document.getElementById('cardsPool');
+  const slots = document.querySelectorAll('.slot');
+  const checkBtn = document.getElementById('checkBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const message = document.getElementById('message');
+
+  let dragged = null;
+
+  // ---------- Drag & Drop ----------
+  function makeDraggable(card) {
+    card.setAttribute('draggable', 'true');
+
+    card.addEventListener('dragstart', (e) => {
+      dragged = card;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', card.textContent); } catch (err) {}
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      dragged = null;
+      document.querySelectorAll('.drag-over').forEach(z => z.classList.remove('drag-over'));
+    });
+  }
+
+  document.querySelectorAll('.card').forEach(makeDraggable);
+
+  // ---------- Слоты ----------
+  function setupSlot(slot) {
+    slot.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (slot.querySelector('.card') && slot.querySelector('.card') !== dragged) {
+        e.dataTransfer.dropEffect = 'none';
+        return;
+      }
+      e.dataTransfer.dropEffect = 'move';
+      slot.classList.add('drag-over');
+    });
+
+    slot.addEventListener('dragleave', (e) => {
+      if (!slot.contains(e.relatedTarget)) {
+        slot.classList.remove('drag-over');
+      }
+    });
+
+    slot.addEventListener('drop', (e) => {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      if (!dragged) return;
+
+      const existing = slot.querySelector('.card');
+      const sourceSlot = dragged.closest('.slot');
+
+      if (existing && existing !== dragged) {
+        if (sourceSlot) {
+          sourceSlot.appendChild(existing);
+        } else {
+          pool.appendChild(existing);
+        }
+      }
+
+      clearHighlights();
+      slot.appendChild(dragged);
+    });
+  }
+
+  slots.forEach(setupSlot);
+
+  // ---------- Пул как зона сброса ----------
+  pool.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    pool.classList.add('drag-over');
+  });
+
+  pool.addEventListener('dragleave', (e) => {
+    if (!pool.contains(e.relatedTarget)) {
+      pool.classList.remove('drag-over');
+    }
+  });
+
+  pool.addEventListener('drop', (e) => {
+    e.preventDefault();
+    pool.classList.remove('drag-over');
+    if (!dragged) return;
+
+    clearHighlights();
+    pool.appendChild(dragged);
+  });
+
+  // ---------- Проверка ----------
+  function clearHighlights() {
+    document.querySelectorAll('.card').forEach(c => {
+      c.classList.remove('correct', 'wrong');
+    });
+    message.classList.remove('show', 'success', 'error');
+    message.textContent = '';
+  }
+
+  checkBtn.addEventListener('click', () => {
+    clearHighlights();
+
+    const allCards = document.querySelectorAll('.card');
+    let allCorrect = true;
+
+    allCards.forEach(card => {
+      const parentSlot = card.closest('.slot');
+      if (!parentSlot) {
+        allCorrect = false;
+        return;
+      }
+
+      const slotType = parentSlot.dataset.type;
+      const correctType = card.dataset.correct;
+
+      if (slotType === correctType) {
+        card.classList.add('correct');
+      } else {
+        card.classList.add('wrong');
+        allCorrect = false;
+      }
+    });
+
+    if (allCorrect) {
+      message.textContent = 'Верно!';
+      message.classList.add('show', 'success');
+    } else {
+      message.textContent = 'Упс...., не совсем так';
+      message.classList.add('show', 'error');
+    }
+  });
+
+  // ---------- Сброс ----------
+  resetBtn.addEventListener('click', () => {
+    clearHighlights();
+    document.querySelectorAll('.card').forEach(card => {
+      pool.appendChild(card);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
