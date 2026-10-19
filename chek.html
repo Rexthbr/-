@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чек-лист проверки внутренних документов по действиям персонала в случае аварии или инцидента</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+        body {
+            background: #f5f7fa; display: flex; justify-content: center;
+            align-items: center; min-height: 100vh; margin: 0; padding: 20px;
+        }
+        .checklist-container {
+            max-width: 1200px; width: 100%; background: #fff;
+            border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            padding: 32px 28px;
+        }
+        h2 {
+            font-weight: 500; font-size: 1.8rem; color: #1e2b3a;
+            margin: 0 0 24px; letter-spacing: -0.3px;
+            border-bottom: 2px solid #e9edf2; padding-bottom: 16px;
+        }
+        .list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+        .row {
+            display: flex; align-items: center; gap: 12px; background: #fafcfe;
+            border-radius: 14px; padding: 6px 12px 6px 6px;
+            transition: background .2s; border: 1px solid #edf2f7;
+            flex-wrap: nowrap; /* всегда один ряд */
+        }
+        .row:hover { background: #fff; border-color: #d0dbe8; }
+        .checkbox-wrapper {
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; width: 40px; height: 40px;
+            border-radius: 10px; transition: background .15s; flex-shrink: 0;
+        }
+        .checkbox-wrapper:hover { background: #eef3f9; }
+        .checkbox-inner {
+            width: 24px; height: 24px; border-radius: 6px;
+            border: 2px solid #9aaebf; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .15s ease; font-size: 16px; font-weight: bold;
+            color: #fff; line-height: 1;
+        }
+        .checkbox-inner.checked { background: #2b6ed7; border-color: #2b6ed7; }
+
+        /* Левый чекбокс — точка */
+        .checkbox-inner.left-dot.checked::after {
+            content: "●";
+            color: #fff;
+            font-size: 12px;
+            line-height: 1;
+        }
+        /* Правый чекбокс — галочка */
+        .checkbox-inner.right-tick.checked::after {
+            content: "✓";
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .text-field {
+            flex: 1 1 auto; min-width: 0; /* важно для сжатия */
+            padding: 12px 16px; background: #fff; border-radius: 12px;
+            border: 1px solid #dee7ef; font-size: .95rem; color: #1f2a38;
+            transition: background .3s ease, border-color .2s;
+            min-height: 52px; display: flex; align-items: center;
+            line-height: 1.4; word-break: break-word;
+        }
+        .text-field.left-highlight { background: #fef9e7; border-color: #f5e6b0; }
+        .text-field.green-highlight { background: #e1f5e8; border-color: #b8dfc6; }
+        .text-field.red-highlight { background: #fde8e8; border-color: #f5b5b5; }
+        .right-checkbox { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .right-checkbox .checkbox-wrapper { cursor: not-allowed; opacity: .5; }
+        .right-checkbox .checkbox-wrapper.active { cursor: pointer; opacity: 1; }
+        .right-checkbox .checkbox-wrapper.active:hover { background: #eef3f9; }
+        .date-section {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
+            margin: 24px 0 28px; background: #f8fafd; padding: 18px 20px;
+            border-radius: 18px; border: 1px solid #e5ecf3;
+        }
+        .date-label { font-weight: 500; color: #1e2b3a; font-size: 1rem; }
+        .date-input {
+            padding: 12px 16px; border-radius: 12px; border: 1px solid #cfdbe8;
+            font-size: 1rem; background: #fff; color: #1f2a38; width: 180px;
+            outline: none; transition: border .15s;
+        }
+        .date-input:focus { border-color: #2b6ed7; box-shadow: 0 0 0 3px rgba(43,110,215,.1); }
+        .btn-fix {
+            padding: 12px 28px; border-radius: 12px; border: none;
+            background: #2b6ed7; color: #fff; font-weight: 500; font-size: 1rem;
+            cursor: pointer; transition: background .15s, transform .1s;
+            box-shadow: 0 4px 8px rgba(43,110,215,.2);
+        }
+        .btn-fix:hover { background: #1e5bb8; }
+        .btn-fix:active { transform: scale(.97); }
+        .comments-section { display: flex; flex-direction: column; gap: 8px; }
+        .comments-label { font-weight: 500; color: #1e2b3a; font-size: 1rem; margin-bottom: 4px; }
+        .comments-area {
+            width: 100%; min-height: 120px; padding: 16px 18px;
+            border-radius: 16px; border: 1px solid #dee7ef; background: #fff;
+            font-size: .95rem; color: #1f2a38; resize: vertical; outline: none;
+            transition: border .15s, box-shadow .15s; font-family: inherit; line-height: 1.5;
+        }
+        .comments-area:focus { border-color: #2b6ed7; box-shadow: 0 0 0 3px rgba(43,110,215,.1); }
+        .right-checkbox .checkbox-inner.disabled { background: #f0f4f9; border-color: #cbd8e6; }
+        .right-checkbox .checkbox-inner.disabled.checked { background: #b0c6db; border-color: #b0c6db; }
+        .right-checkbox .checkbox-inner.disabled.checked::after { color: #fff; opacity: .8; }
+        .footer-actions { display: flex; justify-content: flex-end; margin-top: 24px; gap: 12px; }
+        .btn-download {
+            padding: 12px 28px; border-radius: 12px; border: none;
+            background: #1e8e3e; color: #fff; font-weight: 500; font-size: 1rem;
+            cursor: pointer; transition: background .15s, transform .1s;
+            box-shadow: 0 4px 8px rgba(30,142,62,.2);
+        }
+        .btn-download:hover { background: #166b2f; }
+        .btn-download:active { transform: scale(.97); }
+        .btn-download:disabled { background: #9bbf9b; cursor: wait; }
+
+        /* Мобильная адаптация: ряд остаётся одним, но окошки и отступы меньше */
+        @media (max-width: 700px) {
+            .checklist-container { padding: 20px 16px; }
+            .row { gap: 6px; padding: 4px 6px; }
+            .checkbox-wrapper { width: 32px; height: 32px; border-radius: 8px; }
+            .checkbox-inner { width: 20px; height: 20px; border-radius: 5px; }
+            .checkbox-inner.left-dot.checked::after { font-size: 10px; }
+            .checkbox-inner.right-tick.checked::after { font-size: 14px; }
+            .text-field { padding: 10px 10px; min-height: 44px; font-size: .88rem; }
+            .date-section { flex-direction: column; align-items: stretch; }
+            .date-input { width: 100%; }
+            .footer-actions { justify-content: stretch; }
+            .btn-download { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="checklist-container">
+    <h2>Чек-лист проверки внутренних документов по действиям персонала в случае аварии или инцидента</h2>
+
+    <div class="list" id="checklist">
+        <div class="row" data-index="0">
+            <div class="checkbox-wrapper left-checkbox-wrapper" data-side="left">
+                <div class="checkbox-inner left-dot" id="left-check-0"></div>
+            </div>
+            <div class="text-field" id="text-field-0">
+                Положение о порядке технического расследования причин инцидентов
+            </div>
+            <div class="right-checkbox">
+                <div class="checkbox-wrapper" data-side="right" id="right-wrapper-0">
+                    <div class="checkbox-inner right-tick disabled" id="right-check-0"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" data-index="1">
+            <div class="checkbox-wrapper left-checkbox-wrapper" data-side="left">
+                <div class="checkbox-inner left-dot" id="left-check-1"></div>
+            </div>
+            <div class="text-field" id="text-field-1">
+                Информация о действиях работников при инцидентах в производственных инструкциях
+            </div>
+            <div class="right-checkbox">
+                <div class="checkbox-wrapper" data-side="right" id="right-wrapper-1">
+                    <div class="checkbox-inner right-tick disabled" id="right-check-1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" data-index="2">
+            <div class="checkbox-wrapper left-checkbox-wrapper" data-side="left">
+                <div class="checkbox-inner left-dot" id="left-check-2"></div>
+            </div>
+            <div class="text-field" id="text-field-2">
+                План мероприятий по локализации и ликвидации последствий аварий (ПМЛА)
+            </div>
+            <div class="right-checkbox">
+                <div class="checkbox-wrapper" data-side="right" id="right-wrapper-2">
+                    <div class="checkbox-inner right-tick disabled" id="right-check-2"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" data-index="3">
+            <div class="checkbox-wrapper left-checkbox-wrapper" data-side="left">
+                <div class="checkbox-inner left-dot" id="left-check-3"></div>
+            </div>
+            <div class="text-field" id="text-field-3">
+                Инструкция по действиям персонала при аварии
+            </div>
+            <div class="right-checkbox">
+                <div class="checkbox-wrapper" data-side="right" id="right-wrapper-3">
+                    <div class="checkbox-inner right-tick disabled" id="right-check-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="date-section">
+        <span class="date-label">Дата проверки:</span>
+        <input type="date" class="date-input" id="dateInput" placeholder="ДД.ММ.ГГГГ">
+        <button class="btn-fix" id="fixButton">Зафиксировать</button>
+    </div>
+
+    <div class="comments-section">
+        <div class="comments-label">Комментарий:</div>
+        <textarea class="comments-area" id="commentsArea" placeholder="Внесите текст, сроки исполнения, контрольный срок и т.д."></textarea>
+    </div>
+
+    <div class="footer-actions">
+        <button class="btn-download" id="downloadButton">Скачать</button>
+    </div>
+</div>
+
+<!-- Библиотека docx для создания настоящего файла Microsoft Word (.docx) -->
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+
+<script>
+    (function() {
+        const ITEMS_COUNT = 4;
+        const leftStates = new Array(ITEMS_COUNT).fill(false);
+        const rightStates = new Array(ITEMS_COUNT).fill(false);
+        let fixedPressed = false;
+
+        const leftCheckboxes = [];
+        const leftWrappers = [];
+        const rightCheckboxes = [];
+        const rightWrappers = [];
+        const textFields = [];
+
+        for (let i = 0; i < ITEMS_COUNT; i++) {
+            leftCheckboxes.push(document.getElementById(`left-check-${i}`));
+            rightCheckboxes.push(document.getElementById(`right-check-${i}`));
+            textFields.push(document.getElementById(`text-field-${i}`));
+            rightWrappers.push(document.getElementById(`right-wrapper-${i}`));
+            leftWrappers.push(document.querySelector(`.row[data-index="${i}"] .left-checkbox-wrapper`));
+        }
+
+        const itemTexts = textFields.map(el => el.textContent.trim().replace(/\s+/g, ' '));
+
+        function updateUI(index) {
+            const leftChecked = leftStates[index];
+            const rightChecked = rightStates[index];
+
+            leftCheckboxes[index].classList.toggle('checked', leftChecked);
+            textFields[index].classList.toggle('left-highlight', leftChecked);
+
+            const rightInner = rightCheckboxes[index];
+            const rightWrapper = rightWrappers[index];
+
+            if (leftChecked) {
+                rightWrapper.classList.add('active');
+                rightInner.classList.remove('disabled');
+                rightInner.classList.toggle('checked', rightChecked);
+            } else {
+                rightWrapper.classList.remove('active');
+                rightInner.classList.add('disabled');
+                rightStates[index] = false;
+                rightInner.classList.remove('checked');
+                textFields[index].classList.remove('green-highlight');
+            }
+
+            textFields[index].classList.toggle('green-highlight', leftChecked && rightStates[index]);
+            textFields[index].classList.toggle('red-highlight', fixedPressed && leftChecked && !rightStates[index]);
+        }
+
+        function updateAll() {
+            for (let i = 0; i < ITEMS_COUNT; i++) updateUI(i);
+        }
+
+        leftWrappers.forEach((wrapper, index) => {
+            wrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                leftStates[index] = !leftStates[index];
+                if (!leftStates[index]) rightStates[index] = false;
+                updateUI(index);
+            });
+        });
+
+        rightWrappers.forEach((wrapper, index) => {
+            wrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!leftStates[index]) return;
+                rightStates[index] = !rightStates[index];
+                updateUI(index);
+            });
+        });
+
+        document.getElementById('fixButton').addEventListener('click', () => {
+            fixedPressed = true;
+            updateAll();
+
+            const dateValue = document.getElementById('dateInput').value;
+            const comments = document.getElementById('commentsArea').value;
+
+            const leftCheckedList = leftStates.map((v, i) => v ? `п.${i+1}` : null).filter(Boolean);
+            const rightCheckedList = rightStates.map((v, i) => v ? `п.${i+1}` : null).filter(Boolean);
+            const notDoneList = leftStates.map((v, i) => (v && !rightStates[i]) ? `п.${i+1}` : null).filter(Boolean);
+
+            let msg =
+                `📅 Дата: ${dateValue || 'не указана'}\n` +
+                `● Левая колонка отмечена: ${leftCheckedList.length ? leftCheckedList.join(', ') : 'нет'}\n` +
+                `✓ Правая колонка (выполнено): ${rightCheckedList.length ? rightCheckedList.join(', ') : 'нет'}\n`;
+            if (notDoneList.length) msg += `⚠️ Не выполнено (слева есть, справа нет): ${notDoneList.join(', ')}\n`;
+            msg += `💬 Комментарий: ${comments || 'пусто'}`;
+            alert(msg);
+        });
+
+        // ===== Скачивание настоящего .docx через библиотеку docx =====
+        document.getElementById('downloadButton').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Формируется...';
+
+            try {
+                const dateValue = document.getElementById('dateInput').value;
+                const comments = document.getElementById('commentsArea').value;
+
+                let formattedDate = '—';
+                if (dateValue) {
+                    const [y, m, d] = dateValue.split('-');
+                    if (y && m && d) formattedDate = `${d}.${m}.${y}`;
+                }
+
+                const {
+                    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+                    WidthType, AlignmentType, BorderStyle, ShadingType
+                } = window.docx;
+
+                function makeCell(children, { width, shading } = {}) {
+                    return new TableCell({
+                        children: Array.isArray(children) ? children : [children],
+                        shading: shading ? { fill: shading, type: ShadingType.CLEAR, color: 'auto' } : undefined,
+                        width: width ? { size: width, type: WidthType.DXA } : undefined,
+                        verticalAlign: 'center',
+                        margins: { top: 80, bottom: 80, left: 100, right: 100 },
+                        borders: {
+                            top:    { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                            bottom: { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                            left:   { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                            right:  { style: BorderStyle.SINGLE, size: 4, color: '999999' }
+                        }
+                    });
+                }
+
+                function makeRun(text, opts = {}) {
+                    return new TextRun({ text, font: 'Times New Roman', size: 24, ...opts });
+                }
+
+                const title = new Paragraph({
+                    children: [makeRun('Чек-лист проверки внутренних документов по действиям персонала в случае аварии или инцидента', { bold: true, size: 32 })],
+                    spacing: { after: 200 }
+                });
+
+                const datePara = new Paragraph({
+                    children: [makeRun('Дата проверки: ', { bold: true }), makeRun(formattedDate)],
+                    spacing: { after: 200 }
+                });
+
+                const headerRow = new TableRow({
+                    tableHeader: true,
+                    children: [
+                        makeCell(new Paragraph({
+                            children: [makeRun('Отметка', { bold: true })],
+                            alignment: AlignmentType.CENTER
+                        }), { width: 1200, shading: 'EEF3F9' }),
+                        makeCell(new Paragraph({
+                            children: [makeRun('Пункт', { bold: true })]
+                        }), { width: 7000, shading: 'EEF3F9' }),
+                        makeCell(new Paragraph({
+                            children: [makeRun('Выполнено', { bold: true })],
+                            alignment: AlignmentType.CENTER
+                        }), { width: 1200, shading: 'EEF3F9' })
+                    ]
+                });
+
+                const rows = [headerRow];
+
+                for (let i = 0; i < ITEMS_COUNT; i++) {
+                    const leftMark = leftStates[i] ? '●' : '○';
+                    const rightMark = rightStates[i] ? '✓' : '—';
+
+                    let shading = null;
+                    if (fixedPressed && leftStates[i] && !rightStates[i]) shading = 'FDE8E8';
+                    else if (leftStates[i] && rightStates[i]) shading = 'E1F5E8';
+                    else if (leftStates[i]) shading = 'FEF9E7';
+
+                    rows.push(new TableRow({
+                        children: [
+                            makeCell(new Paragraph({
+                                children: [makeRun(leftMark, { size: 28 })],
+                                alignment: AlignmentType.CENTER
+                            }), { width: 1200, shading }),
+                            makeCell(new Paragraph({
+                                children: [makeRun(itemTexts[i])]
+                            }), { width: 7000, shading }),
+                            makeCell(new Paragraph({
+                                children: [makeRun(rightMark, { size: 28 })],
+                                alignment: AlignmentType.CENTER
+                            }), { width: 1200, shading })
+                        ]
+                    }));
+                }
+
+                const table = new Table({
+                    rows,
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: {
+                        top:    { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                        bottom: { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                        left:   { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                        right:  { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                        insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: '999999' },
+                        insideVertical:   { style: BorderStyle.SINGLE, size: 4, color: '999999' }
+                    }
+                });
+
+                const commentTitle = new Paragraph({
+                    children: [makeRun('Комментарий:', { bold: true })],
+                    spacing: { before: 300, after: 120 }
+                });
+
+                const commentText = comments && comments.trim()
+                    ? comments.split('\n').map(line => new Paragraph({ children: [makeRun(line)] }))
+                    : [new Paragraph({ children: [makeRun('—')] })];
+
+                const doc = new Document({
+                    sections: [{
+                        properties: { page: { margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 } } },
+                        children: [title, datePara, table, commentTitle, ...commentText]
+                    }]
+                });
+
+                const blob = await Packer.toBlob(doc);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const safeDate = formattedDate.replace(/\./g, '-');
+                a.download = `Чек-лист_действия_персонала_при_аварии_${safeDate}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Ошибка формирования документа Word:', err);
+                alert('Не удалось сформировать файл Word. Проверьте подключение к интернету (библиотека docx) и повторите попытку.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Скачать';
+            }
+        });
+
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('dateInput').value = `${yyyy}-${mm}-${dd}`;
+
+        updateAll();
+    })();
+</script>
+</body>
+</html>
