@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Карусель — бесконечная</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f4f6f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .carousel-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .arrow {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: #2c6fbb;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+    user-select: none;
+    z-index: 10;
+  }
+
+  .arrow:hover {
+    background: #1f5490;
+    transform: scale(1.08);
+  }
+
+  .arrow:active {
+    transform: scale(0.95);
+  }
+
+  .carousel-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  /* Сцена с 3D-перспективой */
+  .stage {
+    width: 100%;
+    height: 440px;
+    position: relative;
+    perspective: 1400px;
+    perspective-origin: 50% 50%;
+    overflow: hidden;
+  }
+
+  .track {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 400px;
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Карточки позиционируются в 3D-пространстве */
+  .card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 400px;
+    transition: transform 0.55s cubic-bezier(0.25, 0.8, 0.25, 1),
+                opacity 0.55s ease,
+                filter 0.55s ease;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .card-inner {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    padding: 28px 22px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  .card-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1a2b42;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .card-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #4a5568;
+    text-align: center;
+  }
+
+  .card.center {
+    opacity: 1;
+    pointer-events: auto;
+    filter: none;
+  }
+
+  .card.side {
+    opacity: 0.55;
+    pointer-events: none;
+    filter: blur(3px) brightness(0.92);
+  }
+
+  .card.side .card-inner {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #c3ccd6;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.25s;
+  }
+
+  .dot.active {
+    background: #2c6fbb;
+    transform: scale(1.25);
+  }
+
+  @media (max-width: 600px) {
+    .arrow {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+    .stage {
+      height: 400px;
+      perspective: 1000px;
+    }
+    .track {
+      width: 260px;
+      height: 350px;
+    }
+    .card {
+      width: 260px;
+      height: 350px;
+    }
+    .card-inner {
+      padding: 24px 18px;
+    }
+    .card.side {
+      opacity: 0.35;
+      filter: blur(4px) brightness(0.9);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="carousel-wrapper">
+  <button class="arrow" id="prev" aria-label="Назад">&#8592;</button>
+
+  <div class="carousel-column">
+    <div class="stage">
+      <div class="track" id="track">
+        <div class="card">
+          <div class="card-inner">
+            <h2 class="card-title">Для страховой компании</h2>
+            <p class="card-text">Если у вас заключен договор обязательного страхования гражданской ответственности, размер ущерба определяет сумму страховой выплаты</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-inner">
+            <h2 class="card-title">Для суда</h2>
+            <p class="card-text">Если дело дойдет до судебного разбирательства, точный расчет ущерба станет доказательной базой</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-inner">
+            <h2 class="card-title">Для Ростехнадзора</h2>
+            <p class="card-text">Материалы расследования, включая расчет вреда, направляются в надзорный орган</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-inner">
+            <h2 class="card-title">Для вашей организации</h2>
+            <p class="card-text">Чтобы понимать масштаб потерь и принимать решения о восстановлении</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <button class="arrow" id="next" aria-label="Вперёд">&#8594;</button>
+</div>
+
+<script>
+  const track = document.getElementById('track');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const dotsContainer = document.getElementById('dots');
+  const cards = Array.from(track.querySelectorAll('.card'));
+  const total = cards.length;
+  let index = 0; // текущая активная карточка (0..total-1)
+
+  // точки-индикаторы
+  cards.forEach((_, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  const dots = dotsContainer.querySelectorAll('.dot');
+
+  /*
+    Бесконечная карусель:
+    - центральная карточка: pos === 0
+    - левая соседняя: pos === -1
+    - правая соседняя: pos === +1
+    Все остальные скрыты.
+    Позиция считается циклически по модулю total,
+    поэтому после 4-й идёт 1-я, а до 1-й — 4-я.
+  */
+  function layout() {
+    cards.forEach((card, i) => {
+      // кратчайшее циклическое смещение: -2, -1, 0, 1, 2
+      let pos = i - index;
+      if (pos > total / 2) pos -= total;
+      if (pos < -total / 2) pos += total;
+
+      card.classList.remove('center', 'side');
+
+      if (pos === 0) {
+        card.style.transform = `translateX(0) translateZ(0) rotateY(0deg)`;
+        card.style.zIndex = 100;
+        card.classList.add('center');
+      } else if (pos === -1) {
+        card.style.transform = `translateX(-190px) translateZ(-180px) rotateY(28deg)`;
+        card.style.zIndex = 50;
+        card.classList.add('side');
+      } else if (pos === 1) {
+        card.style.transform = `translateX(190px) translateZ(-180px) rotateY(-28deg)`;
+        card.style.zIndex = 50;
+        card.classList.add('side');
+      } else {
+        // скрываем всё лишнее, без торчащих кусков
+        card.style.transform = `translateX(${pos * 260}px) translateZ(-420px) rotateY(${pos * -30}deg)`;
+        card.style.zIndex = 10;
+        // opacity: 0 из базового .card
+      }
+    });
+
+    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+  }
+
+  function goTo(i) {
+    // бесконечный переход по модулю
+    index = ((i % total) + total) % total;
+    layout();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(index - 1));
+  nextBtn.addEventListener('click', () => goTo(index + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') goTo(index - 1);
+    if (e.key === 'ArrowRight') goTo(index + 1);
+  });
+
+  let startX = null;
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, {passive: true});
+  stage.addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) goTo(index + (dx < 0 ? 1 : -1));
+    startX = null;
+  }, {passive: true});
+
+  layout();
+</script>
+
+</body>
+</html>
