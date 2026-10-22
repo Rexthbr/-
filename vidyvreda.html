@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сортировка карточек — экономический ущерб и вред</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 30px 20px;
+        }
+
+        .app {
+            max-width: 1300px;
+            width: 100%;
+        }
+
+        /* Заголовок интерактива */
+        .app-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e3c5c;
+            margin-bottom: 30px;
+            line-height: 1.3;
+            letter-spacing: 0.3px;
+        }
+
+        /* Три поля в один ряд */
+        .fields-row {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: nowrap;
+            align-items: stretch;
+        }
+
+        .field {
+            flex: 1 1 0;
+            min-width: 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            padding: 16px 12px 12px;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.2s;
+            border: 2px dashed #b0c4de;
+        }
+
+        .field-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+            color: #1e3c5c;
+            line-height: 1.3;
+            letter-spacing: 0.3px;
+            min-height: 3.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropzone {
+            flex: 1;
+            min-height: 200px;
+            background: #f9fcff;
+            border-radius: 16px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: background 0.2s, box-shadow 0.2s;
+            border: 1px solid #d0e0f0;
+        }
+
+        .dropzone.drag-over {
+            background: #e6f0ff;
+            box-shadow: inset 0 0 0 2px #3b82f6;
+        }
+
+        /* Карточки — фиксированный размер, текст помещается */
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e2f3f;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #dbe7f3;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.1s, box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 78px;
+            height: 78px;
+            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 1.25;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+
+        /* Область исходных карточек */
+        .cards-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            background: #eef4fa;
+            border-radius: 30px;
+            padding: 24px 20px;
+            margin-bottom: 30px;
+            border: 1px solid #cbdae8;
+            min-height: 130px;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .cards-pool.drag-over {
+            background: #dde9f5;
+        }
+
+        .cards-pool .card {
+            width: 200px;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .dropzone .card {
+            width: 100%;
+            height: 78px;
+            min-height: 78px;
+            padding: 8px 10px;
+            font-size: 0.82rem;
+        }
+
+        /* Кнопки */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px 42px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-check {
+            background: #1e3c5c;
+            color: white;
+        }
+
+        .btn-check:hover {
+            background: #0f2a44;
+            transform: translateY(-2px);
+        }
+
+        .btn-check:disabled {
+            background: #8da2b5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .btn-retry {
+            background: #f59e0b;
+            color: #1e2f3f;
+        }
+
+        .btn-retry:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Подсветка */
+        .card.correct {
+            background: #d1fae5;
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px #10b981;
+        }
+
+        .card.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px #ef4444;
+        }
+
+        /* Сообщение о результате — в области пула */
+        .result-message {
+            width: 100%;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e3c5c;
+            padding: 18px 12px;
+            min-height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.3px;
+        }
+
+        .result-message.success {
+            color: #0a7e4e;
+        }
+
+        .result-message.error {
+            color: #b91c1c;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 800px) {
+            .app-title {
+                font-size: 1.4rem;
+                margin-bottom: 22px;
+            }
+            .field-header {
+                font-size: 0.95rem;
+                min-height: 2.8rem;
+            }
+            .card {
+                font-size: 0.75rem;
+                height: 72px;
+                min-height: 72px;
+                padding: 6px 8px;
+            }
+            .cards-pool .card {
+                width: 160px;
+                font-size: 0.8rem;
+            }
+            .dropzone .card {
+                font-size: 0.72rem;
+            }
+            .btn {
+                padding: 12px 28px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .app-title {
+                font-size: 1.15rem;
+                margin-bottom: 16px;
+            }
+            .fields-row {
+                gap: 8px;
+            }
+            .field {
+                padding: 8px 6px;
+            }
+            .field-header {
+                font-size: 0.78rem;
+                min-height: 3rem;
+            }
+            .dropzone {
+                padding: 4px;
+                gap: 4px;
+            }
+            .card {
+                font-size: 0.65rem;
+                height: 64px;
+                min-height: 64px;
+                padding: 4px;
+                border-radius: 10px;
+                line-height: 1.15;
+            }
+            .cards-pool .card {
+                width: 130px;
+                height: 64px;
+                min-height: 64px;
+                font-size: 0.68rem;
+            }
+            .dropzone .card {
+                font-size: 0.62rem;
+            }
+            .result-message {
+                font-size: 1rem;
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Заголовок интерактива -->
+        <h1 class="app-title">Затраты по видам вреда</h1>
+
+        <!-- Три поля в один ряд -->
+        <div class="fields-row" id="fieldsRow">
+            <div class="field" data-category="economic">
+                <div class="field-header">Экономический ущерб</div>
+                <div class="dropzone" id="zone-economic" data-category="economic"></div>
+            </div>
+            <div class="field" data-category="environment">
+                <div class="field-header">Вред окружающей среде</div>
+                <div class="dropzone" id="zone-environment" data-category="environment"></div>
+            </div>
+            <div class="field" data-category="health">
+                <div class="field-header">Вред, причиненный жизни и здоровью людей</div>
+                <div class="dropzone" id="zone-health" data-category="health"></div>
+            </div>
+        </div>
+
+        <!-- Область исходных карточек + сообщение -->
+        <div class="cards-pool" id="cardsPool">
+            <!-- Карточки добавляются через JS -->
+        </div>
+
+        <!-- Кнопки -->
+        <div class="actions">
+            <button class="btn btn-check" id="checkBtn" disabled>Проверить</button>
+            <button class="btn btn-retry hidden" id="retryBtn">Повторить</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const CARDS_DATA = [
+                { id: 'c1', text: 'Затраты на первоначальные аварийно-спасательные работы', category: 'economic' },
+                { id: 'c2', text: 'Компенсация семьям погибших', category: 'health' },
+                { id: 'c3', text: 'Расходы на восстановление окружающей среды', category: 'environment' },
+                { id: 'c4', text: 'Расходы на лечение и реабилитацию пострадавших', category: 'health' },
+                { id: 'c5', text: 'Упущенная выгода', category: 'economic' },
+                { id: 'c6', text: 'Таксы за загрязнение почвы, воды и воздуха', category: 'environment' }
+            ];
+
+            const pool = document.getElementById('cardsPool');
+            const zones = {
+                economic: document.getElementById('zone-economic'),
+                environment: document.getElementById('zone-environment'),
+                health: document.getElementById('zone-health')
+            };
+            const checkBtn = document.getElementById('checkBtn');
+            const retryBtn = document.getElementById('retryBtn');
+
+            let draggedCard = null;
+
+            // ---- Создание карточек ----
+            function createCardElement(cardData) {
+                const el = document.createElement('div');
+                el.classList.add('card');
+                el.setAttribute('draggable', 'true');
+                el.dataset.id = cardData.id;
+                el.dataset.category = cardData.category;
+                el.textContent = cardData.text;
+
+                el.addEventListener('dragstart', handleDragStart);
+                el.addEventListener('dragend', handleDragEnd);
+                return el;
+            }
+
+            function createCardsInPool() {
+                pool.innerHTML = '';
+                const shuffled = [...CARDS_DATA].sort(() => Math.random() - 0.5);
+                shuffled.forEach(cardData => {
+                    pool.appendChild(createCardElement(cardData));
+                });
+            }
+
+            // ---- Drag & Drop ----
+            function handleDragStart(e) {
+                if (!retryBtn.classList.contains('hidden')) {
+                    e.preventDefault();
+                    return;
+                }
+                draggedCard = this;
+                this.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', this.dataset.id);
+                e.dataTransfer.effectAllowed = 'move';
+            }
+
+            function handleDragEnd(e) {
+                this.classList.remove('dragging');
+                draggedCard = null;
+                document.querySelectorAll('.dropzone, .cards-pool').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+            }
+
+            function setupDropZones() {
+                const dropTargets = [pool, ...Object.values(zones)];
+
+                dropTargets.forEach(target => {
+                    target.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        target.classList.add('drag-over');
+                    });
+
+                    target.addEventListener('dragleave', () => {
+                        target.classList.remove('drag-over');
+                    });
+
+                    target.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        target.classList.remove('drag-over');
+                        if (!draggedCard) return;
+                        if (!retryBtn.classList.contains('hidden')) return;
+
+                        clearResultMessage();
+
+                        if (target === pool) {
+                            pool.appendChild(draggedCard);
+                        } else {
+                            target.appendChild(draggedCard);
+                        }
+                        updateCheckButtonState();
+                    });
+                });
+            }
+
+            function clearResultMessage() {
+                const msg = pool.querySelector('.result-message');
+                if (msg) msg.remove();
+            }
+
+            function allCardsInZones() {
+                return pool.querySelectorAll('.card').length === 0;
+            }
+
+            function updateCheckButtonState() {
+                if (!retryBtn.classList.contains('hidden')) return;
+                checkBtn.disabled = !allCardsInZones();
+            }
+
+            // ---- Проверка ответов ----
+            function checkAnswers() {
+                clearResultMessage();
+
+                const allCards = document.querySelectorAll('.card');
+                let allCorrect = true;
+
+                allCards.forEach(card => {
+                    card.classList.remove('correct', 'incorrect');
+                    const cardCategory = card.dataset.category;
+                    const parentZone = card.closest('.dropzone');
+                    const zoneCategory = parentZone ? parentZone.dataset.category : null;
+
+                    if (zoneCategory && cardCategory === zoneCategory) {
+                        card.classList.add('correct');
+                    } else {
+                        card.classList.add('incorrect');
+                        allCorrect = false;
+                    }
+                });
+
+                checkBtn.classList.add('hidden');
+                retryBtn.classList.remove('hidden');
+
+                const msg = document.createElement('div');
+                msg.classList.add('result-message');
+                if (allCorrect) {
+                    msg.classList.add('success');
+                    msg.textContent = 'Поздравляем! Вы справились с заданием';
+                } else {
+                    msg.classList.add('error');
+                    msg.textContent = 'Есть ошибки!';
+                }
+                pool.appendChild(msg);
+            }
+
+            // ---- Сброс: очищаем поля, возвращаем карточки в пул ----
+            function resetGame() {
+                Object.values(zones).forEach(zone => {
+                    zone.innerHTML = '';
+                });
+
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('correct', 'incorrect');
+                });
+
+                createCardsInPool();
+
+                checkBtn.classList.remove('hidden');
+                checkBtn.disabled = true;
+                retryBtn.classList.add('hidden');
+
+                document.querySelectorAll('.dropzone, .cards-pool').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+
+                updateCheckButtonState();
+            }
+
+            // ---- Инициализация ----
+            function init() {
+                createCardsInPool();
+                setupDropZones();
+                updateCheckButtonState();
+
+                checkBtn.addEventListener('click', checkAnswers);
+                retryBtn.addEventListener('click', resetGame);
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
