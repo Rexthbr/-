@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Составляющие ущерба от аварии</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    line-height: 1.6;
+  }
+
+  .accordion {
+    width: 100%;
+    max-width: 720px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+  }
+
+  .accordion-title {
+    padding: 26px 28px 18px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.2px;
+    border-bottom: 2px solid #f3f4f6;
+  }
+
+  .accordion-item {
+    border-bottom: 1px solid #eceef2;
+  }
+
+  .accordion-item:last-child {
+    border-bottom: none;
+  }
+
+  .accordion-header {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 18px 24px 18px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: background 0.2s ease, color 0.2s ease;
+    font-family: inherit;
+  }
+
+  .accordion-header:hover {
+    background: #f8fafc;
+  }
+
+  .accordion-header:focus-visible {
+    outline: 2px solid #3b6ea5;
+    outline-offset: -2px;
+  }
+
+  /* Более синяя подсветка активной вкладки */
+  .accordion-item.active .accordion-header {
+    color: #2c5282;
+    background: #e3edf7;
+  }
+
+  /* Номер пункта */
+  .num {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  .accordion-item.active .num {
+    background: #3b6ea5;
+    color: #ffffff;
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
+  /* Иконка-стрелка */
+  .arrow {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+
+  .arrow::before,
+  .arrow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 2px;
+    background: #9ca3af;
+    border-radius: 2px;
+    transition: background 0.25s ease;
+  }
+
+  .arrow::before {
+    transform: translate(-100%, -50%) rotate(45deg);
+    transform-origin: right center;
+  }
+
+  .arrow::after {
+    transform: translate(0, -50%) rotate(-45deg);
+    transform-origin: left center;
+  }
+
+  .accordion-item.active .arrow {
+    transform: rotate(180deg);
+  }
+
+  .accordion-item.active .arrow::before,
+  .accordion-item.active .arrow::after {
+    background: #3b6ea5;
+  }
+
+  /* Контент */
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .accordion-content-inner {
+    padding: 2px 24px 22px 64px;
+    color: #4b5563;
+    font-size: 15px;
+  }
+
+  .accordion-content-inner ul {
+    margin-top: 8px;
+    padding-left: 18px;
+    list-style: none;
+  }
+
+  .accordion-content-inner li {
+    position: relative;
+    padding-left: 4px;
+    margin-bottom: 6px;
+  }
+
+  .accordion-content-inner li::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3b6ea5;
+  }
+
+  .accordion-content-inner li:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 520px) {
+    .accordion-title {
+      padding: 20px 18px 14px;
+      font-size: 17px;
+    }
+    .accordion-header {
+      padding: 15px 16px;
+      font-size: 15px;
+    }
+    .accordion-content-inner {
+      padding: 2px 16px 18px 16px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="accordion" id="accordion">
+  <div class="accordion-title">Составляющие ущерба, причинённого аварией</div>
+
+  <!-- 1 -->
+  <div class="accordion-item">
+    <button class="accordion-header" aria-expanded="false" aria-controls="panel-1">
+      <span class="num">1</span>
+      <span class="header-text">Прямые потери</span>
+      <span class="arrow" aria-hidden="true"></span>
+    </button>
+    <div class="accordion-content" id="panel-1" role="region">
+      <div class="accordion-content-inner">
+        Это самый очевидный вид ущерба — то, что было уничтожено или повреждено
+        непосредственно в результате аварии:
+        <ul>
+          <li>поврежденное или уничтоженное оборудование;</li>
+          <li>разрушенные здания и сооружения;</li>
+          <li>потерянное сырье, материалы, готовая продукция;</li>
+          <li>затраты на первоначальные аварийно-спасательные работы.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="accordion-item">
+    <button class="accordion-header" aria-expanded="false" aria-controls="panel-2">
+      <span class="num">2</span>
+      <span class="header-text">Расходы на ликвидацию последствий</span>
+      <span class="arrow" aria-hidden="true"></span>
+    </button>
+    <div class="accordion-content" id="panel-2" role="region">
+      <div class="accordion-content-inner">
+        Сюда входят расходы:
+        <ul>
+          <li>на демонтаж поврежденного оборудования;</li>
+          <li>очистку территории;</li>
+          <li>восстановительные работы;</li>
+          <li>оплату услуг аварийно-спасательных служб.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="accordion-item">
+    <button class="accordion-header" aria-expanded="false" aria-controls="panel-3">
+      <span class="num">3</span>
+      <span class="header-text">Потери от простоя производства</span>
+      <span class="arrow" aria-hidden="true"></span>
+    </button>
+    <div class="accordion-content" id="panel-3" role="region">
+      <div class="accordion-content-inner">
+        Когда производство остановлено, вы теряете прибыль, которую могли бы
+        получить, если бы аварии не было. Это называется упущенной выгодой.
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="accordion-item">
+    <button class="accordion-header" aria-expanded="false" aria-controls="panel-4">
+      <span class="num">4</span>
+      <span class="header-text">Вред, причинённый окружающей среде</span>
+      <span class="arrow" aria-hidden="true"></span>
+    </button>
+    <div class="accordion-content" id="panel-4" role="region">
+      <div class="accordion-content-inner">
+        Это отдельная категория ущерба. Сюда входят:
+        <ul>
+          <li>загрязнение почвы, воды, воздуха;</li>
+          <li>уничтожение или повреждение объектов растительного и животного мира;</li>
+          <li>расходы на восстановление окружающей среды.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="accordion-item">
+    <button class="accordion-header" aria-expanded="false" aria-controls="panel-5">
+      <span class="num">5</span>
+      <span class="header-text">Вред, причинённый жизни и здоровью людей</span>
+      <span class="arrow" aria-hidden="true"></span>
+    </button>
+    <div class="accordion-content" id="panel-5" role="region">
+      <div class="accordion-content-inner">
+        Если в результате аварии пострадали или погибли люди, это тоже часть ущерба.
+        Сюда входят:
+        <ul>
+          <li>расходы на лечение и реабилитацию пострадавших;</li>
+          <li>компенсации семьям погибших;</li>
+          <li>потеря кормильца.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const headers = document.querySelectorAll('.accordion-header');
+
+  headers.forEach(header => {
+    header.addEventListener('click', () => {
+      const item = header.parentElement;
+      const content = header.nextElementSibling;
+      const isOpen = item.classList.contains('active');
+
+      // Закрыть все остальные секции
+      document.querySelectorAll('.accordion-item').forEach(other => {
+        if (other !== item) {
+          other.classList.remove('active');
+          const h = other.querySelector('.accordion-header');
+          const c = other.querySelector('.accordion-content');
+          h.setAttribute('aria-expanded', 'false');
+          c.style.maxHeight = null;
+        }
+      });
+
+      // Переключить текущую
+      if (isOpen) {
+        item.classList.remove('active');
+        header.setAttribute('aria-expanded', 'false');
+        content.style.maxHeight = null;
+      } else {
+        item.classList.add('active');
+        header.setAttribute('aria-expanded', 'true');
+        content.style.maxHeight = content.scrollHeight + 'px';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
