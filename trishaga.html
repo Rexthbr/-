@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Первые действия при аварии</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #ffffff;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1e1e1e;
+      line-height: 1.3;
+      margin-bottom: 1.25rem;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    .accordion {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.02);
+      border: 1px solid #f1f3f5;
+      overflow: hidden;
+    }
+
+    details {
+      border-bottom: 1px solid #f1f3f5;
+      transition: background 0.2s ease;
+    }
+
+    details:last-child {
+      border-bottom: none;
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.25rem 1.75rem;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #1e1e1e;
+      background: #ffffff;
+      transition: background 0.15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+    summary::marker {
+      content: '';
+      display: none;
+    }
+
+    summary:hover {
+      background-color: #fafafa;
+    }
+
+    summary:focus-visible {
+      outline: 2px solid #cdd9e5;
+      outline-offset: -2px;
+    }
+
+    .summary-text {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-align: left;
+    }
+
+    /* Большая цифра — размером в две строки текста, тёмно-синего цвета (светлее) */
+    .step-number {
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #2f4b7c;
+      flex-shrink: 0;
+      min-width: 1.6ch;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.2s ease;
+    }
+
+    details[open] .step-number {
+      color: #24406b;
+    }
+
+    .icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), background 0.2s;
+      color: #5e6f7e;
+      flex-shrink: 0;
+    }
+
+    .icon svg {
+      width: 1rem;
+      height: 1rem;
+      display: block;
+    }
+
+    details[open] .icon {
+      transform: rotate(180deg);
+      background: #f2f5f9;
+      color: #1e1e1e;
+    }
+
+    .content {
+      padding: 0 1.75rem 1.5rem 1.75rem;
+      color: #3d4b5c;
+      font-size: 1rem;
+      line-height: 1.65;
+      background: #ffffff;
+      animation: fadeSlide 0.25s ease;
+      text-align: left;
+    }
+
+    @keyframes fadeSlide {
+      0% {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content p {
+      margin-bottom: 0.85rem;
+    }
+    .content p:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem;
+      }
+      .page-title {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+      }
+      summary {
+        padding: 1rem 1.25rem;
+        font-size: 0.98rem;
+      }
+      .summary-text {
+        gap: 0.75rem;
+      }
+      .step-number {
+        font-size: 2.2rem;
+      }
+      .content {
+        padding: 0 1.25rem 1.25rem 1.25rem;
+        font-size: 0.95rem;
+      }
+      .icon {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+      .icon svg {
+        width: 0.85rem;
+        height: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <h1 class="page-title">Первые действия при аварии</h1>
+
+    <div class="accordion">
+
+      <details>
+        <summary>
+          <span class="summary-text">
+            <span class="step-number">1</span>
+            <span>Выполнить мероприятия по локализации и ликвидации аварии</span>
+          </span>
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+        </summary>
+        <div class="content">
+          <p>Работники организации обязаны выполнять действия, прописанные в ПМЛА или инструкции, которые устанавливают порядок действий работников в аварийных ситуациях.</p>
+          <p>Обычно в таких документах организаций указано, что при аварии необходимо оперативно известить АСФ и специальные организации, например, МЧС, пожарную службу. Если есть пострадавшие — оказать первую помощь и вызвать бригаду скорой помощи.</p>
+          <p>Далее необходимо оповестить всех работников организации об аварии, а некоторых эвакуировать за пределы зоны действия опасных факторов. На ОПО должны остаться только работники, на которых возложены функции по локализации и ликвидации аварии.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="summary-text">
+            <span class="step-number">2</span>
+            <span>Сохранить обстановку на месте аварии без изменения</span>
+          </span>
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+        </summary>
+        <div class="content">
+          <p>Вторым шагом по порядку является сохранность места аварии. Организация обязана принять меры по сохранению обстановки на месте аварии.</p>
+          <p>Исключение составляют случаи, когда необходимо провести мероприятия по ликвидации последствий аварии и сохранить жизнь и здоровье людей (п. 6 Порядка расследования аварий и инцидентов № 503).</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>
+          <span class="summary-text">
+            <span class="step-number">3</span>
+            <span>Составить и разослать оперативное сообщение</span>
+          </span>
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+        </summary>
+        <div class="content">
+          <p>В соответствии с законодательством организация обязана направить оперативное сообщение об аварии или инциденте в уполномоченные органы: Ростехнадзор, а также в органы местного самоуправления и другие инстанции, предусмотренные порядком.</p>
+          <p>Сообщение передаётся незамедлительно — по телефону, факсу или электронной почте, с последующим оформлением в письменном виде. В нём указываются сведения об организации, месте, времени и характере аварии, наличии пострадавших и принятых мерах.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+</body>
+</html>
