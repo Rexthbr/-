@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Действия после расследования · Аккордеон</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.5;
+            color: #1e1e1e;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .accordion-container {
+            max-width: 880px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.02);
+            padding: 0.25rem 0;
+        }
+
+        .accordion-header {
+            font-size: 1.9rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #000000;
+            padding: 0 1.25rem 1.5rem 1.25rem;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 1rem;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid #eaeaea;
+            background: #ffffff;
+            transition: background 0.2s;
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Заголовок (кнопка) */
+        .accordion-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            text-align: left;
+            padding: 1.35rem 1.75rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #111111;
+            transition: background 0.15s, color 0.2s;
+            border-radius: 0;
+            outline: none;
+            letter-spacing: -0.01em;
+            gap: 1.5rem;
+        }
+
+        .accordion-btn:hover {
+            background: #f8f8f8;
+        }
+
+        .accordion-btn:focus-visible {
+            outline: 2px solid #c0c0c0;
+            outline-offset: -2px;
+            border-radius: 4px;
+        }
+
+        /* Левая часть с номером и текстом */
+        .btn-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            flex: 1;
+        }
+
+        .item-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.8rem;
+            height: 1.8rem;
+            background: #f2f2f2;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c2c2c;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+            padding: 0 0.3rem;
+        }
+
+        .item-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            line-height: 1.4;
+            color: #111;
+        }
+
+        /* Иконка плюс/минус */
+        .accordion-icon {
+            width: 1.8rem;
+            height: 1.8rem;
+            border-radius: 50%;
+            background: #f2f2f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s, transform 0.25s ease;
+            color: #333;
+        }
+
+        .accordion-icon svg {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.25s ease;
+        }
+
+        .accordion-btn[aria-expanded="true"] .accordion-icon {
+            background: #e6e6e6;
+        }
+
+        .accordion-btn[aria-expanded="true"] .accordion-icon svg {
+            transform: rotate(45deg);
+        }
+
+        /* Контентная панель */
+        .accordion-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.3s ease;
+            opacity: 0;
+            background: #ffffff;
+            padding: 0 1.75rem;
+        }
+
+        .accordion-panel-inner {
+            padding: 0 0 1.8rem 2.65rem;
+            font-size: 1.05rem;
+            color: #2a2a2a;
+            border-left: 2px solid #f0f0f0;
+            margin-left: 0.8rem;
+            padding-left: 1.2rem;
+        }
+
+        .accordion-panel p {
+            margin-bottom: 1rem;
+        }
+
+        .accordion-panel p:last-child {
+            margin-bottom: 0;
+        }
+
+        .accordion-panel strong {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .accordion-item.active .accordion-panel {
+            opacity: 1;
+        }
+
+        /* Красный акцент для 5-го пункта */
+        .red-accent {
+            color: #c00000;
+            font-weight: 500;
+        }
+
+        /* Красный номер для 5-го пункта */
+        .item-number.red-number {
+            color: #c00000;
+            background: #fde8e8;
+        }
+
+        /* Сброс стилей кнопки */
+        button {
+            all: unset;
+            box-sizing: border-box;
+        }
+
+        .accordion-btn {
+            all: unset;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            text-align: left;
+            padding: 1.35rem 1.75rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #111;
+            background: transparent;
+            transition: background 0.15s;
+            gap: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        .accordion-btn:hover {
+            background: #f8f8f8;
+        }
+
+        .accordion-btn:focus-visible {
+            outline: 2px solid #c0c0c0;
+            outline-offset: -2px;
+            border-radius: 6px;
+        }
+
+        .accordion-btn:focus:not(:focus-visible) {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="accordion-container">
+        <div class="accordion-header">Действия владельца ОПО по окончанию расследования аварии</div>
+
+        <!-- 1 -->
+        <div class="accordion-item">
+            <button class="accordion-btn" aria-expanded="false" aria-controls="panel1" id="btn1">
+                <span class="btn-label">
+                    <span class="item-number">1</span>
+                    <span class="item-title">Направьте материалы расследования в организации</span>
+                </span>
+                <span class="accordion-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+            <div class="accordion-panel" id="panel1" role="region" aria-labelledby="btn1">
+                <div class="accordion-panel-inner">
+                    <p>Кроме участников расследования, направить материалы придется и в другие организации, если так решит председатель Комиссии (п. 24 Порядка расследования аварий и инцидентов № 503).</p>
+                    <p>Направить материалы нужно не позднее семи рабочих дней после окончания расследования. Документ, подтверждающий направление материалов расследования, необходимо представить председателю комиссии.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="accordion-item">
+            <button class="accordion-btn" aria-expanded="false" aria-controls="panel2" id="btn2">
+                <span class="btn-label">
+                    <span class="item-number">2</span>
+                    <span class="item-title">Утвердите мероприятия по устранению причин последствий аварии</span>
+                </span>
+                <span class="accordion-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+            <div class="accordion-panel" id="panel2" role="region" aria-labelledby="btn2">
+                <div class="accordion-panel-inner">
+                    <p>Утвердите предложенные комиссией мероприятия по устранению причин и последствий аварий, а также примите предложения по организации безаварийной эксплуатации ОПО.</p>
+                    <p>Руководитель организации должен в течение семи рабочих дней с даты подписания акта издать приказ об утверждении мероприятий. В нем он назначит лиц, ответственных за выполнение каждого пункта мероприятий и сроки исполнения (п. 20 Порядка расследования аварий и инцидентов № 503).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="accordion-item">
+            <button class="accordion-btn" aria-expanded="false" aria-controls="panel3" id="btn3">
+                <span class="btn-label">
+                    <span class="item-number">3</span>
+                    <span class="item-title">Направьте отчет о выполненных пунктах мероприятий в Ростехнадзор</span>
+                </span>
+                <span class="accordion-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+            <div class="accordion-panel" id="panel3" role="region" aria-labelledby="btn3">
+                <div class="accordion-panel-inner">
+                    <p>Направьте в свой территориальный Ростехнадзор отчет о выполненных мероприятиях в установленный комиссией срок.</p>
+                    <p>Учтите, что отчитываться нужно не позднее 10 рабочих дней за выполнение каждого мероприятия, указанного в акте (п. 21 Порядка расследования аварий и инцидентов № 503).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="accordion-item">
+            <button class="accordion-btn" aria-expanded="false" aria-controls="panel4" id="btn4">
+                <span class="btn-label">
+                    <span class="item-number">4</span>
+                    <span class="item-title">Внесите информацию об аварии и сведения по мероприятиям в журнал учета</span>
+                </span>
+                <span class="accordion-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+            <div class="accordion-panel" id="panel4" role="region" aria-labelledby="btn4">
+                <div class="accordion-panel-inner">
+                    <p>Такой журнал должны вести все организации. Форма журнала указана в Порядке расследования аварий и инцидентов № 503.</p>
+                    <p>В нем нужно указывать сведения о направлении информации в Ростехнадзор и отметку о выполнении корректирующих мероприятий по итогам расследования.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5* — цифра, звёздочка и пояснение красные -->
+        <div class="accordion-item">
+            <button class="accordion-btn" aria-expanded="false" aria-controls="panel5" id="btn5">
+                <span class="btn-label">
+                    <span class="item-number red-number">5<span class="red-accent">*</span></span>
+                    <span class="item-title">Переработайте положение о ПК <span class="red-accent">(по рекомендации комиссии)</span></span>
+                </span>
+                <span class="accordion-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+            <div class="accordion-panel" id="panel5" role="region" aria-labelledby="btn5">
+                <div class="accordion-panel-inner">
+                    <p>Данное требование комиссия не всегда включает в мероприятия по результатам проведенного расследования.</p>
+                    <p>Если комиссия сделала вывод о несоответствии разделов положения ПК, то организация должна его переработать с учетом замечаний (п. 5 Правил организации и проведения ПК № 2168). Если такого вывода нет, то перерабатывать положение о ПК не нужно.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const items = document.querySelectorAll('.accordion-item');
+
+            function closeAll() {
+                items.forEach(item => {
+                    const btn = item.querySelector('.accordion-btn');
+                    const panel = item.querySelector('.accordion-panel');
+                    if (btn.getAttribute('aria-expanded') === 'true') {
+                        btn.setAttribute('aria-expanded', 'false');
+                        item.classList.remove('active');
+                        panel.style.maxHeight = null;
+                        panel.style.opacity = '0';
+                    }
+                });
+            }
+
+            items.forEach(item => {
+                const btn = item.querySelector('.accordion-btn');
+                const panel = item.querySelector('.accordion-panel');
+
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+                    if (!isExpanded) {
+                        closeAll();
+                    }
+
+                    if (isExpanded) {
+                        btn.setAttribute('aria-expanded', 'false');
+                        item.classList.remove('active');
+                        panel.style.maxHeight = null;
+                        panel.style.opacity = '0';
+                    } else {
+                        btn.setAttribute('aria-expanded', 'true');
+                        item.classList.add('active');
+                        panel.style.maxHeight = panel.scrollHeight + 'px';
+                        panel.style.opacity = '1';
+                    }
+                });
+
+                btn.setAttribute('aria-expanded', 'false');
+                item.classList.remove('active');
+                panel.style.maxHeight = null;
+                panel.style.opacity = '0';
+            });
+
+            window.addEventListener('resize', function() {
+                const activeItem = document.querySelector('.accordion-item.active');
+                if (activeItem) {
+                    const panel = activeItem.querySelector('.accordion-panel');
+                    if (panel && panel.style.maxHeight) {
+                        panel.style.maxHeight = 'none';
+                        const newHeight = panel.scrollHeight;
+                        panel.style.maxHeight = newHeight + 'px';
+                    }
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
