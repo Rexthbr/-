@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кандидаты на должность ответственного за производственный контроль</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e2b3c;
+            text-align: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #d0d9e8;
+            padding-bottom: 0.4rem;
+            max-width: 560px;
+            line-height: 1.3;
+        }
+
+        /* Контейнер строго 560px, без прокрутки */
+        .cards-container {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 8px;
+            perspective: 1200px;
+            width: 560px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .card {
+            width: 180px;
+            height: 300px;
+            position: relative;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+            /* плавное увеличение при перевороте */
+            transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1),
+                        box-shadow 0.45s ease,
+                        z-index 0s linear;
+            transform-origin: center center;
+            z-index: 1;
+        }
+
+        /* Перевёрнутая карточка увеличивается и выходит на передний план */
+        .card.flipped {
+            transform: scale(1.6);
+            z-index: 100;
+            box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            border-radius: 12px;
+        }
+
+        .card.flipped .flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #e8eef5;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-front {
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem;
+            text-align: center;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            padding: 0.3rem;
+            background: #fbfdff;
+            overflow-y: auto;
+        }
+
+        .candidate-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0b1e33;
+            margin-bottom: 0.4rem;
+        }
+
+        .avatar-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 0.8rem;
+            border-radius: 50%;
+            background: #eef3fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #d6e2f0;
+            overflow: hidden;
+            font-size: 38px;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .btn-view {
+            background: #1d3b5c;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0.45rem 1.2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 3px 8px -3px rgba(24, 50, 80, 0.3);
+            margin-top: 0.2rem;
+        }
+
+        .btn-view:hover {
+            background: #14304a;
+        }
+
+        .btn-view:active {
+            transform: scale(0.97);
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 6px;
+            margin-bottom: 0.3rem;
+        }
+
+        .candidate-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.62rem;
+            line-height: 1.3;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .candidate-table th {
+            background: #1e3b5a;
+            color: white;
+            font-weight: 500;
+            padding: 4px 3px;
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+            text-align: left;
+            border-right: 1px solid #2e5077;
+        }
+
+        .candidate-table th:last-child {
+            border-right: none;
+        }
+
+        .candidate-table td {
+            padding: 3px 3px;
+            border-bottom: 1px solid #e2eaf3;
+            vertical-align: top;
+            color: #1d2c3f;
+            background: white;
+            word-break: break-word;
+        }
+
+        .candidate-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .candidate-table td:first-child {
+            font-weight: 500;
+            color: #1d3b5c;
+            width: 18px;
+            text-align: center;
+            background: #f6faff;
+        }
+
+        .candidate-table td:nth-child(2) {
+            font-weight: 500;
+            color: #16324a;
+            background: #f9fcff;
+        }
+
+        .vote-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 0.3rem 0 0.3rem;
+            flex-shrink: 0;
+        }
+
+        .btn-thumb {
+            background: white;
+            border: 1px solid #cddae9;
+            border-radius: 30px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.62rem;
+            font-weight: 500;
+            color: #1d3b5c;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+        }
+
+        .btn-thumb svg {
+            width: 13px;
+            height: 13px;
+            fill: #1d3b5c;
+        }
+
+        .btn-thumb:hover {
+            background: #eaf1fa;
+        }
+
+        .feedback-message {
+            font-size: 0.58rem;
+            line-height: 1.35;
+            padding: 0.35rem 0.35rem;
+            border-radius: 6px;
+            margin: 0.2rem 0 0;
+            background: #f0f6ff;
+            color: #0d2a44;
+            border-left: 3px solid #3a6ea5;
+            word-wrap: break-word;
+            min-height: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .feedback-message.error {
+            background: #fff3f0;
+            border-left-color: #c44b2b;
+            color: #6d2a1a;
+        }
+
+        .feedback-message.success {
+            background: #edf7ed;
+            border-left-color: #2e7d4e;
+            color: #1a4a2e;
+        }
+
+        .close-flip {
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #4a6689;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .close-flip:hover {
+            background: white;
+            color: #1d3b5c;
+        }
+
+        .card-back::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .card-back::-webkit-scrollbar-track {
+            background: #f0f4fa;
+        }
+
+        .card-back::-webkit-scrollbar-thumb {
+            background: #b7c8dd;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 580px) {
+            .cards-container {
+                width: 100%;
+                max-width: 560px;
+                gap: 4px;
+            }
+            .card {
+                width: calc((100% - 8px) / 3);
+                height: 280px;
+            }
+            .card.flipped {
+                transform: scale(1.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Кандидаты на должность ответственного за производственный контроль</h1>
+
+    <div class="cards-container">
+        <!-- Карточка 1: Иванов — 👷 -->
+        <div class="card" id="card-ivanov">
+            <div class="flip-inner">
+                <div class="card-front">
+                    <div class="candidate-name">Иванов</div>
+                    <div class="avatar-icon" aria-hidden="true">👷</div>
+                    <button class="btn-view" data-target="ivanov">Смотреть</button>
+                </div>
+                <div class="card-back">
+                    <button class="close-flip" data-target="ivanov" title="Вернуться">✕</button>
+                    <div class="table-wrapper">
+                        <table class="candidate-table">
+                            <thead>
+                                <tr>
+                                    <th>№ п/п</th>
+                                    <th>Требования</th>
+                                    <th>Данные кандидата</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1</td><td>Уровень образования</td><td>Специалитет</td></tr>
+                                <tr><td>2</td><td>Специализация</td><td>Механик</td></tr>
+                                <tr><td>3</td><td>Опыт и стаж работы</td><td>Работает 4 года инженером-механиком на ОПО с ГПМ</td></tr>
+                                <tr><td>4</td><td>ДПО</td><td>Есть диплом о профессиональной подготовке по техносферной безопасности</td></tr>
+                                <tr><td>5</td><td>Аттестация</td><td>Аттестация по Б.9.1, Б.8.2</td></tr>
+                                <tr><td>6</td><td>Медицинские противопоказания</td><td>Отсутствуют</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="vote-buttons">
+                        <button class="btn-thumb down" data-candidate="ivanov" data-vote="down">
+                            <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57c-.05.23-.05.47 0 .7.1.67.62 1.23 1.3 1.23.34 0 .67-.13.91-.38L15 15.5V3zm5.5 0c-.83 0-1.5.67-1.5 1.5v9c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5z"/></svg>
+                            Вниз
+                        </button>
+                        <button class="btn-thumb up" data-candidate="ivanov" data-vote="up">
+                            <svg viewBox="0 0 24 24"><path d="M9 21h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2c0-1.1-.9-2-2-2h-6.31l.95-4.57c.05-.23.05-.47 0-.7-.1-.67-.62-1.23-1.3-1.23-.34 0-.67.13-.91.38L9 8.5V21zm-5.5 0c.83 0 1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v9c0 .83.67 1.5 1.5 1.5z"/></svg>
+                            Вверх
+                        </button>
+                    </div>
+                    <div class="feedback-message" id="feedback-ivanov"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка 2: Петров — 👨‍💼 -->
+        <div class="card" id="card-petrov">
+            <div class="flip-inner">
+                <div class="card-front">
+                    <div class="candidate-name">Петров</div>
+                    <div class="avatar-icon" aria-hidden="true">👨‍💼</div>
+                    <button class="btn-view" data-target="petrov">Смотреть</button>
+                </div>
+                <div class="card-back">
+                    <button class="close-flip" data-target="petrov" title="Вернуться">✕</button>
+                    <div class="table-wrapper">
+                        <table class="candidate-table">
+                            <thead>
+                                <tr><th>№ п/п</th><th>Требования</th><th>Данные кандидата</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1</td><td>Уровень образования</td><td>Магистратура</td></tr>
+                                <tr><td>2</td><td>Специализация</td><td>Механик</td></tr>
+                                <tr><td>3</td><td>Опыт и стаж работы</td><td>Работает 6 лет менеджером по продажам</td></tr>
+                                <tr><td>4</td><td>ДПО</td><td>Есть диплом о профессиональной подготовке по промбезопасности</td></tr>
+                                <tr><td>5</td><td>Аттестация</td><td>Не аттестован</td></tr>
+                                <tr><td>6</td><td>Медицинские противопоказания</td><td>Отсутствуют</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="vote-buttons">
+                        <button class="btn-thumb down" data-candidate="petrov" data-vote="down">
+                            <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57c-.05.23-.05.47 0 .7.1.67.62 1.23 1.3 1.23.34 0 .67-.13.91-.38L15 15.5V3zm5.5 0c-.83 0-1.5.67-1.5 1.5v9c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5z"/></svg>
+                            Вниз
+                        </button>
+                        <button class="btn-thumb up" data-candidate="petrov" data-vote="up">
+                            <svg viewBox="0 0 24 24"><path d="M9 21h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2c0-1.1-.9-2-2-2h-6.31l.95-4.57c.05-.23.05-.47 0-.7-.1-.67-.62-1.23-1.3-1.23-.34 0-.67.13-.91.38L9 8.5V21zm-5.5 0c.83 0 1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v9c0 .83.67 1.5 1.5 1.5z"/></svg>
+                            Вверх
+                        </button>
+                    </div>
+                    <div class="feedback-message" id="feedback-petrov"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка 3: Сидоров — 👮‍♂️ -->
+        <div class="card" id="card-sidorov">
+            <div class="flip-inner">
+                <div class="card-front">
+                    <div class="candidate-name">Сидоров</div>
+                    <div class="avatar-icon" aria-hidden="true">👮‍♂️</div>
+                    <button class="btn-view" data-target="sidorov">Смотреть</button>
+                </div>
+                <div class="card-back">
+                    <button class="close-flip" data-target="sidorov" title="Вернуться">✕</button>
+                    <div class="table-wrapper">
+                        <table class="candidate-table">
+                            <thead>
+                                <tr><th>№ п/п</th><th>Требования</th><th>Данные кандидата</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1</td><td>Уровень образования</td><td>Специалитет</td></tr>
+                                <tr><td>2</td><td>Специализация</td><td>Механик</td></tr>
+                                <tr><td>3</td><td>Опыт и стаж работы</td><td>Опыт работы на ОПО с ГПМ — 11 лет, последние 5 лет работает инспектором в Ростехнадзоре</td></tr>
+                                <tr><td>4</td><td>ДПО</td><td>Есть диплом о профессиональной подготовке по техносферной безопасности</td></tr>
+                                <tr><td>5</td><td>Аттестация</td><td>Не аттестован</td></tr>
+                                <tr><td>6</td><td>Медицинские противопоказания</td><td>Отсутствуют</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="vote-buttons">
+                        <button class="btn-thumb down" data-candidate="sidorov" data-vote="down">
+                            <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57c-.05.23-.05.47 0 .7.1.67.62 1.23 1.3 1.23.34 0 .67-.13.91-.38L15 15.5V3zm5.5 0c-.83 0-1.5.67-1.5 1.5v9c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5z"/></svg>
+                            Вниз
+                        </button>
+                        <button class="btn-thumb up" data-candidate="sidorov" data-vote="up">
+                            <svg viewBox="0 0 24 24"><path d="M9 21h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2c0-1.1-.9-2-2-2h-6.31l.95-4.57c.05-.23.05-.47 0-.7-.1-.67-.62-1.23-1.3-1.23-.34 0-.67.13-.91.38L9 8.5V21zm-5.5 0c.83 0 1.5-.67 1.5-1.5v-9c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v9c0 .83.67 1.5 1.5 1.5z"/></svg>
+                            Вверх
+                        </button>
+                    </div>
+                    <div class="feedback-message" id="feedback-sidorov"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const messages = {
+                ivanov: {
+                    down: 'ВЫ ОШИБЛИСЬ! Иванов соответствует требованиям профстандарта',
+                    up: 'ВЕРНО! Иванов соответствует требованиям профстандарта'
+                },
+                petrov: {
+                    down: 'ВЕРНО! Петров не соответствует требованиям профстандарта. Он работает менеджером по продажам и у него нет опыта работы на ОПО, а нам нужен работник с опытом на ОПО не менее трех лет',
+                    up: 'ВЫ ОШИБЛИСЬ! Петров не соответствует требованиям профстандарта. Он работает менеджером по продажам и у него нет опыта работы на ОПО, а нам нужен работник с опытом на ОПО не менее трех лет'
+                },
+                sidorov: {
+                    down: 'ВЫ ОШИБЛИСЬ! Сидоров соответствует требованиям профстандарта. Возможно вас смутило то, что у него нет аттестации. Но на аттестацию отведен один месяц с момента назначения, поэтому в нашем случае нет основания для отказа',
+                    up: 'ВЕРНО! Сидоров соответствует требованиям профстандарта'
+                }
+            };
+
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const targetId = btn.dataset.target;
+                    const card = document.getElementById(`card-${targetId}`);
+                    if (card) card.classList.add('flipped');
+                });
+            });
+
+            document.querySelectorAll('.close-flip').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const targetId = btn.dataset.target;
+                    const card = document.getElementById(`card-${targetId}`);
+                    if (card) {
+                        card.classList.remove('flipped');
+                        const feedback = document.getElementById(`feedback-${targetId}`);
+                        if (feedback) {
+                            feedback.textContent = '';
+                            feedback.className = 'feedback-message';
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-thumb').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const candidate = btn.dataset.candidate;
+                    const vote = btn.dataset.vote;
+                    const feedbackEl = document.getElementById(`feedback-${candidate}`);
+                    if (!feedbackEl) return;
+
+                    const msg = messages[candidate]?.[vote];
+                    if (msg) {
+                        feedbackEl.textContent = msg;
+                        feedbackEl.className = 'feedback-message';
+                        if (msg.startsWith('ВЕРНО!')) {
+                            feedbackEl.classList.add('success');
+                        } else if (msg.startsWith('ВЫ ОШИБЛИСЬ!')) {
+                            feedbackEl.classList.add('error');
+                        } else {
+                            feedbackEl.classList.add('success');
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.card-back').forEach(back => {
+                back.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        e.stopPropagation();
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
